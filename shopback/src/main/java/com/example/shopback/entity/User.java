@@ -1,6 +1,6 @@
 package com.example.shopback.entity;
 
-import com.example.shopback.componant.Role;
+import com.example.shopback.component.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

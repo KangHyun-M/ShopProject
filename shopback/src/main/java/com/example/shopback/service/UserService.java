@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.example.shopback.componant.Role;
+import com.example.shopback.component.Role;
 import com.example.shopback.dto.UserDTO;
 import com.example.shopback.entity.User;
 import com.example.shopback.repository.UserRepository;
