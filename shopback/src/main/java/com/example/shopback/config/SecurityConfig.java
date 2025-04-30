@@ -33,7 +33,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests((auth) -> auth
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN")              //어드민 권한에만 허용
                 .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")        //유저,어드민 권한에만 허용
-                .requestMatchers("/api/signup","/api/login").permitAll()                    //모든 유저에 허용
+                .requestMatchers("/api/signup","/api/login","/api/check-username","/api/send-auth",
+                "/api/verify-code","/api/check-usernic").permitAll()                                    //모든 유저에 허용
                 .anyRequest().authenticated()                                                           //그 외에는 인증 필요
         );
 

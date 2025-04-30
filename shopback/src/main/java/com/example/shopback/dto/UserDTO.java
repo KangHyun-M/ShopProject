@@ -14,7 +14,9 @@ public class UserDTO {
     
     private String username;    //아이디
     private String password;    //비밀번호
-    //private String confirmPass; //비밀번호 재확인용
-    private String role;        //권한한
+    private String confirmPass; //비밀번호 재확인용
+    private String verificationCode; //인증번호
+    private String usernic;     //닉네임
+    private String role;        //권한
 
 }

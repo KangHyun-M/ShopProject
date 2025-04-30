@@ -84,8 +84,14 @@ public class UserUtils {
         Role roleEnum = Role.valueOf(role); // 문자열을 Role Enum으로 변환
 
         // 실제 사용자 데이터를 DB에서 가져옴
-        User user = userRepository.findByUsername(username);  // JPA를 사용하여 User 엔티티 반환
-        user.setRole(roleEnum);  // Role 설정
-        return user;
+        User user = userRepository.findByUsername(username).orElse(null);  // Optional에서 User 객체를 안전하게 추출
+
+        if (user != null) {
+            user.setRole(roleEnum);  // Role 설정
+            return user;
+        }
+
+        // User가 없다면 null 반환
+        return null;
     }
 }
