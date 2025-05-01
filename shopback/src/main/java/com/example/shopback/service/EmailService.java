@@ -1,35 +1,69 @@
 package com.example.shopback.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import java.security.SecureRandom;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class EmailService {
     
-    @Autowired
-    private JavaMailSender mailSender;
+    private final JavaMailSender javaMailSender;
 
-    @Autowired
-    private EmailVerifyCodeService emailVerifyCodeService;
+    public String sendVerificationCode(String code){
+        String verificationCode = generateCode();
+        String subject ="인증번호";
+        String message = "인증번호는 " + verificationCode + "입니다";
 
-    public void sendVerificationEmail(String username){
-        //인증번호 생성
-        String verificationCode = generateVerificationCode();
-
-        //DB에 인증번호 저장
-        emailVerifyCodeService.sendVerificationCode(username, verificationCode);
-
-        //이메일 전송
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(username);
-        message.setSubject("이메일 인증번호");
-        message.setText("인증번호: " + verificationCode);
-        mailSender.send(message);
+        sendCode(code,subject,message);
+        return verificationCode;
     }
 
-    private String generateVerificationCode(){
-        return String.format("06d%", (int)(Math.random()*1000000));
+    public void sendCode(String recipient, String subject, String text){
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(recipient);
+            message.setSubject(subject);
+            message.setText(text);
+            javaMailSender.send(message);
+        } catch (MailException e) {
+            throw new RuntimeException("이메일 전송 중 오류가 발생했습니다.", e);
+        }
+    }
+
+    // 이메일-코드 저장소 (간단히 메모리에 저장, 실제 운영에서는 Redis 등 사용 권장)
+    private final Map<String, String> verificationCodes = new ConcurrentHashMap<>();
+
+
+    // 인증번호 검증
+    public boolean verifyCode(String username, String inputCode) {
+        String savedCode = verificationCodes.get(username);
+        return savedCode != null && savedCode.equals(inputCode);
+    }
+
+    public String generateCode() {
+        try {
+            int codeLength = 6;
+            String alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+            StringBuilder sb = new StringBuilder(codeLength);
+            Random random = new SecureRandom();
+    
+            for (int i = 0; i < codeLength; i++) {
+                int index = random.nextInt(alphabet.length());
+                char randomChar = alphabet.charAt(index);
+                sb.append(randomChar);
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("인증번호 생성 중 오류가 발생했습니다.", e);
+        }
     }
 }

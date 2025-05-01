@@ -1,17 +1,25 @@
-import React, { createContext, useContext, useState } from "react";
+import axiosInstance from "./axiosInstance";
+import { createContext, useContext, useState } from "react";
 
-//로그인 상태를 관리할 context
 const AuthContext = createContext();
 
-export const useAuth = () => {
-  return useContext(AuthContext); //다른곳에서 로그인 상태를 사용하기
-};
-
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
-  const login = () => setIsLoggedIn(true); //로그인
-  const logout = () => setIsLoggedIn(false); //로그아웃
+  const login = () => {
+    localStorage.setItem("token", "your_token"); // 필요 시 서버 응답 토큰 사용
+    setIsLoggedIn(true);
+  };
+
+  const logout = async () => {
+    try {
+      await axiosInstance.post("/logout"); // Spring Security logout 처리
+    } catch (err) {
+      console.error("서버 로그아웃 실패", err);
+    }
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+  };
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
@@ -19,3 +27,5 @@ export const AuthProvider = ({ children }) => {
     </AuthContext.Provider>
   );
 };
+
+export const useAuth = () => useContext(AuthContext);

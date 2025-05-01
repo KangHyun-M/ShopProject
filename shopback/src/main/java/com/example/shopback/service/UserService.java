@@ -20,13 +20,6 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    @Autowired
-    private EmailService emailService; //인증관련
-
-    @Autowired
-    private EmailVerifyCodeService emailVerifyCodeService; // 인증번호 검증
-
-
 
     //이메일 중복 확인
     public boolean checkUsernameExists(String username){
@@ -38,15 +31,7 @@ public class UserService {
         return userRepository.existsByUsernic(usernic);
     }
 
-    //인증번호 발송
-    public void sendVerifyCode(String username){
-        emailService.sendVerificationEmail(username);
-    }
-
-    //인증번호 확인
-    public boolean verifyCode(String username, String code){
-        return emailVerifyCodeService.verifyCode(username, code);
-    }
+    
 
 
     //저장된 비밀번호와 입력한 비밀번호 비교
@@ -55,7 +40,7 @@ public class UserService {
     }
 
     //회원가입 처리
-    public void signUp(UserDTO userDTO, String verificationCode){
+    public void signUp(UserDTO userDTO){
         //비밀번호 확인
         if(!userDTO.getPassword().equals(userDTO.getConfirmPass())){
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
@@ -69,11 +54,6 @@ public class UserService {
         //닉네임 중복확인
         if(checkUsernicExists(userDTO.getUsernic())){
             throw new IllegalArgumentException("이미 존재하는 닉네임입니다");
-        }
-
-        //인증번호 확인
-        if(!verifyCode(userDTO.getUsername(), verificationCode)){
-            throw new IllegalArgumentException("인증번호가 일치하지 않거나 만료된 인증번호입니다");
         }
 
         //비밀번호 인코딩

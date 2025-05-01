@@ -135,3 +135,10 @@ button[type="submit"]:disabled {
   background-color: #d6d6d6;
   cursor: not-allowed;
 }
+
+.error-message {
+  display: block; /* span을 블록처럼 */
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+}

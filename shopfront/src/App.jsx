@@ -5,13 +5,11 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import { AuthProvider } from "./component/authContext";
+import Navbar from "./component/NavBar"; // 경로 확인
 
 function App() {
   useEffect(() => {
-    //서버에서 렌더링된 HTML문서에서 CSRF 토큰을 가져오는 로직
     const csrfTokenMeta = document.querySelector("meta[name='_csrf']");
-
-    //CSRF토큰이 존재하는지 확인 후 요청 헤더에 추가
     if (csrfTokenMeta) {
       const csrfToken = csrfTokenMeta.content;
       axios.defaults.headers.common["X-XSRF-TOKEN"] = csrfToken;
@@ -20,12 +18,15 @@ function App() {
 
   return (
     <AuthProvider>
-      {/*전체 앱을 authprovider로 감싸서 로그인 상태 전역으로 관리*/}
       <Router>
+        <Navbar /> {/* 모든 페이지 상단에 네비게이션 바 포함 */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          {/* 아래 두 개는 새로 만들거나 필요시 추가 */}
+          <Route path="/cart" element={<div>장바구니</div>} />
+          <Route path="/mypage" element={<div>마이페이지</div>} />
         </Routes>
       </Router>
     </AuthProvider>

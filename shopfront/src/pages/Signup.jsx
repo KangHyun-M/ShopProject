@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../component/axiosInstance";
 import Swal from "sweetalert2";
 import "../static/Signup.css"; // 스타일 파일 임포트
@@ -12,15 +12,61 @@ export default function Signup() {
     confirmPass: "",
     role: "USER",
   });
+
   const [isUsernameValid, setIsUsernameValid] = useState(false);
   const [isPwValid, setIsPwValid] = useState(false);
   const [isConfirmPwValid, setIsConfirmPwValid] = useState(false);
   const [isUsernicValid, setIsUsernicValid] = useState(false);
   const [isAuthValid, setIsAuthValid] = useState(false);
 
+  // 비밀번호 유효성 검사
+  const validatePasswords = useCallback(() => {
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/; // 영어 대소문자 + 숫자 + 특수문자, 8~15자
+    const isPwValid = passwordRegex.test(user.password);
+    const isConfirmPwValid = user.password === user.confirmPass;
+
+    setIsPwValid(isPwValid);
+    setIsConfirmPwValid(isConfirmPwValid);
+  }, [user.password, user.confirmPass]);
+
+  // 닉네임 유효성 검사
+  const validateUsernic = useCallback(() => {
+    const usernicRegex = /^[a-zA-Z0-9]{1,15}$/; // 영어 대소문자 + 숫자, 15자 이하
+    setIsUsernicValid(usernicRegex.test(user.usernic));
+  }, [user.usernic]);
+
+  // 이메일 유효성 검사
+  const validateUsername = useCallback(() => {
+    const usernameRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // 이메일 형식 검사
+    setIsUsernameValid(usernameRegex.test(user.username)); // 유효성 검사 수행
+  }, [user.username]);
+
+  useEffect(() => {
+    validatePasswords();
+    validateUsernic();
+    validateUsername();
+  }, [validatePasswords, validateUsernic, validateUsername]); // 의존성 배열에 함수 추가
+
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setUser((prevUser) => ({ ...prevUser, [id]: value }));
+
+    setUser((prevUser) => {
+      const updatedUser = { ...prevUser, [id]: value };
+
+      if (id === "password" || id === "confirmPass") {
+        validatePasswords();
+      }
+
+      if (id === "usernic") {
+        validateUsernic();
+      }
+
+      if (id === "username") {
+        validateUsername();
+      }
+
+      return updatedUser;
+    });
   };
 
   const checkUsername = async () => {
@@ -28,7 +74,7 @@ export default function Signup() {
       const res = await axiosInstance.post("/check-username", {
         username: user.username,
       });
-      if (res.data.exists) {
+      if (res.data) {
         Swal.fire({
           icon: "error",
           title: "이미 사용중인 이메일입니다",
@@ -59,7 +105,9 @@ export default function Signup() {
     }
 
     try {
-      await axiosInstance.post("/send-auth", { username: user.username });
+      await axiosInstance.post("/send-auth", null, {
+        params: { username: user.username },
+      });
       Swal.fire({
         icon: "success",
         title: "인증번호를 이메일로 전송했습니다",
@@ -76,6 +124,7 @@ export default function Signup() {
   const verifyAuth = async () => {
     try {
       const res = await axiosInstance.post("/verify-code", {
+        username: user.username,
         verificationCode: user.verificationCode,
       });
       if (res.data) {
@@ -103,7 +152,7 @@ export default function Signup() {
       const res = await axiosInstance.post("/check-usernic", {
         usernic: user.usernic,
       });
-      if (res.data.exists) {
+      if (res.data) {
         Swal.fire({
           icon: "error",
           title: "이미 존재하는 닉네임입니다",
@@ -125,23 +174,20 @@ export default function Signup() {
     }
   };
 
-  const validateUsername = (email) => {
-    const regex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-    setIsUsernameValid(regex.test(email));
-  };
-
-  const validatePasswords = () => {
-    const isPwValid = user.password.length >= 8;
-    const isConfirmPwValid = user.password === user.confirmPass;
-
-    setIsPwValid(isPwValid);
-    setIsConfirmPwValid(isConfirmPwValid);
-  };
-
   const handleSumbit = async (e) => {
     e.preventDefault();
+
+    if (!isAuthValid) {
+      Swal.fire({
+        icon: "warning",
+        title: "이메일 인증이 완료되지 않았습니다",
+      });
+      return;
+    }
+
     try {
-      await axiosInstance.post("/signup", user);
+      const userPayload = { ...user, verificationCode: user.verificationCode };
+      await axiosInstance.post("/signup", userPayload);
       Swal.fire({
         icon: "success",
         title: "회원가입 완료",
@@ -174,10 +220,7 @@ export default function Signup() {
               type="email"
               id="username"
               value={user.username}
-              onChange={(e) => {
-                handleChange(e);
-                validateUsername(e.target.value); // 이메일 유효성 검사
-              }}
+              onChange={handleChange}
               placeholder="E-mail"
               required
             />
@@ -210,13 +253,16 @@ export default function Signup() {
               type="password"
               id="password"
               value={user.password}
-              onChange={(e) => {
-                handleChange(e);
-                validatePasswords(); // 비밀번호 유효성 검사
-              }}
+              onChange={handleChange}
               placeholder="비밀번호"
               required
             />
+            {user.password && !isPwValid && (
+              <span className="error-message">
+                비밀번호는 8자 이상, 15자 이하, 영어 대소문자, 숫자, 특수문자를
+                포함해야 합니다.
+              </span>
+            )}
           </div>
 
           {/* 비밀번호 확인 */}
@@ -225,13 +271,15 @@ export default function Signup() {
               type="password"
               id="confirmPass"
               value={user.confirmPass}
-              onChange={(e) => {
-                handleChange(e);
-                validatePasswords(); // 비밀번호 확인 유효성 검사
-              }}
+              onChange={handleChange}
               placeholder="비밀번호 확인"
               required
             />
+            {user.confirmPass && !isConfirmPwValid && (
+              <span className="error-message">
+                비밀번호가 일치하지 않습니다
+              </span>
+            )}
           </div>
 
           {/* 닉네임 입력 */}
@@ -244,6 +292,11 @@ export default function Signup() {
               placeholder="닉네임"
               required
             />
+            {user.usernic && !isUsernicValid && (
+              <span className="error-message">
+                닉네임은 영어 대소문자와 숫자 조합으로 15자 이내여야 합니다.
+              </span>
+            )}
             <button type="button" onClick={checkUserNic}>
               닉네임 중복 확인
             </button>
