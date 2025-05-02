@@ -1,30 +1,18 @@
 import React, { useState } from "react";
-
-import axiosInstance from "../component/axiosInstance";
 import { useAuth } from "../component/authContext"; //로그인 상태 관리 hook 가져오기
-import { useNavigate } from "react-router-dom"; // useNavigate 훅을 가져옴
 
 export default function Login() {
   const { login } = useAuth(); // 로그인 상태 변경 함수
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // useNavigate 훅으로 페이지 이동을 위한 함수
 
   const handleLogin = async (e) => {
-    e.preventDefault(); // form submit 시 페이지 리로드 방지
-
+    e.preventDefault();
     try {
-      const res = await axiosInstance.post("/login", { username, password });
-      if (res.data === "로그인 성공") {
-        login(); // 로그인 성공 시 상태 변경
-        alert("로그인 성공!");
-        // 로그인 성공 후 원하는 페이지로 이동 (예: Home 페이지)
-        navigate("/"); // Home 페이지로 이동
-      } else {
-        alert("아이디나 비밀번호가 맞지 않습니다.");
-      }
+      await login(username, password); // ✅ 이것만 호출
+      // 로그인 성공은 authContext에서 처리됨
     } catch (error) {
-      console.error("로그인 실패: ", error);
+      console.error("로그인 요청 실패: ", error);
       alert("로그인 중 오류가 발생했습니다.");
     }
   };

@@ -1,15 +1,12 @@
-// src/components/Navbar.jsx
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "./authContext"; // 로그인 상태 전역 관리
+import { Link } from "react-router-dom"; // useNavigate 제거
+import { useAuth } from "./authContext";
 
 export default function Navbar() {
-  const { isLoggedIn, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    logout(); // authContext에 정의된 logout 호출
-    navigate("/"); // 홈으로 이동
+    logout();
   };
 
   return (
@@ -24,8 +21,11 @@ export default function Navbar() {
         <li>
           <Link to="/mypage">마이페이지</Link>
         </li>
-        {isLoggedIn ? (
-          <li>
+        {user ? (
+          <li style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <span>
+              {user.username} ({user.role})
+            </span>
             <button onClick={handleLogout}>로그아웃</button>
           </li>
         ) : (

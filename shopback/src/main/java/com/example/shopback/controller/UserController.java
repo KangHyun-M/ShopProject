@@ -1,7 +1,15 @@
 package com.example.shopback.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +28,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
+
     
     //회원가입
     @PostMapping("/signup")
@@ -36,20 +50,47 @@ public class UserController {
     }
     
     @PostMapping("/login")
-    public ResponseEntity<?> logIn(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response){
-        try{
-            boolean isAuthenticated = userService.authenticate(userDTO.getUsername(), userDTO.getPassword());
-
-            if(isAuthenticated){
-                //세션에 유저 정보 저장
-                request.getSession().setAttribute("username", userDTO.getUsername());
-                
+    public ResponseEntity<?> logIn(@RequestBody UserDTO userDTO, HttpServletRequest request, HttpServletResponse response) {
+        String username = userDTO.getUsername();
+        String password = userDTO.getPassword();
+    
+        try {
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    
+            if (passwordEncoder.matches(password, userDetails.getPassword())) {
+                // 인증 성공 시 Authentication 객체 생성
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities());
+    
+                // SecurityContext에 저장
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+    
+                // ✅ 세션에 SecurityContext 저장 (쿠키 발급 핵심 부분)
+                request.getSession(true).setAttribute(
+                    "SPRING_SECURITY_CONTEXT",
+                    SecurityContextHolder.getContext()
+                );
+    
+                System.out.println("로그인 성공 - 아이디: " + username);
                 return ResponseEntity.ok("로그인 성공");
-            } else{
-                return ResponseEntity.status(401).body("아이디 또는 비밀번호가 틀렸습니다.");
+            } else {
+                System.out.println("로그인 실패 - 비밀번호 불일치: " + username);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 틀렸습니다.");
             }
-        } catch (Exception e){
-            return ResponseEntity.status(500).body("서버에러");
+        } catch (Exception e) {
+            System.err.println("로그인 처리 중 오류: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러");
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        try {
+            // 세션 만료 처리
+            request.getSession().invalidate();
+            return ResponseEntity.ok("로그아웃 성공");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("로그아웃 처리 중 오류 발생");
         }
     }
 
@@ -67,5 +108,29 @@ public class UserController {
         return ResponseEntity.ok(exists);
     }
     
+    //현재 로그인한 사용자 정보 반환
+    // @GetMapping("/me")
+    // public UserDTO getCurrentUser(Authentication auth){
+    //     //Authentication 객체에서 사용자 정보 가져오기
+    //      UserDetails userDetails = (UserDetails) auth.getPrincipal();
 
+    //      //CustomUserDetails에서 사용자 정보 가져오고 DTO로 변환
+    //      String username = userDetails.getUsername();
+    //      return userService.findByUsername(username);
+    // }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
+        if (authentication != null && authentication.isAuthenticated()) {
+            String username = authentication.getName();
+            UserDTO userDto = userService.findByUsername(username);
+            if (userDto != null) {
+                return ResponseEntity.ok(userDto);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
 }

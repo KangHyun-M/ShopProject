@@ -6,12 +6,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasAnyRole("ADMIN")              //어드민 권한에만 허용
                 .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")        //유저,어드민 권한에만 허용
                 .requestMatchers("/api/signup","/api/login","/api/check-username","/api/send-auth",
-                "/api/verify-code","/api/check-usernic").permitAll()                                    //모든 유저에 허용
+                "/api/verify-code","/api/check-usernic","/api/me").permitAll()                                    //모든 유저에 허용
                 .anyRequest().authenticated()                                                           //그 외에는 인증 필요
         );
 
@@ -51,13 +53,16 @@ public class SecurityConfig {
         http.sessionManagement((auth) -> auth
                 .sessionFixation()
                 .changeSessionId()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
         );
 
         //로그아웃관련 설정
         http.logout(auth -> auth
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .logoutUrl("/api/logout")
                 .invalidateHttpSession(true)
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setStatus(HttpServletResponse.SC_OK);
+                })
         );
 
         //csrf관련 설정, 개발중에는 disable, 개발후 주석처리
@@ -71,7 +76,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOrigins(List.of("http://localhost:3000")); //리액트 주소
+        corsConfig.setAllowedOriginPatterns(List.of("http://localhost:3000")); //리액트 주소
         corsConfig.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setAllowCredentials(true); //쿠기, 인증을 헤더에 적용
