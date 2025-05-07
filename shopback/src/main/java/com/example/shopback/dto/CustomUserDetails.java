@@ -23,7 +23,7 @@ public class CustomUserDetails implements UserDetails {
 
         //Role enum에서 권한을 가져와서 설정
         //Role Enum을 문자열로 변환하여 권한 부여
-        authorities.add(()-> user.getRole().name());
+        authorities.add(()-> "ROLE_" + user.getRole().name());
         return authorities;
     }
 

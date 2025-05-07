@@ -3,15 +3,16 @@ package com.example.shopback.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.shopback.dto.ItemDTO;
 import com.example.shopback.service.ItemService;
@@ -25,34 +26,37 @@ public class ItemController {
     
     //상품 등록
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/admin/post-item")
-    public void createItem(@RequestBody ItemDTO itemDTO){
-        itemService.createItem(itemDTO);
+    @PostMapping(value = "/admin/registration",consumes = "multipart/form-data")
+    public ResponseEntity<Void> createItem(
+        @RequestPart("item")ItemDTO itemDTO,
+        @RequestPart("images")List<MultipartFile> images){
+        
+        itemService.createItem(itemDTO,images);
+        return ResponseEntity.ok().build();
     }
 
-    //상품 수정
-    @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/admin/post-item/{id}")
-    public void updateItem(@PathVariable Long id, @RequestBody ItemDTO itemDTO){
-        itemService.updateItem(id,itemDTO);
-    }
-
-    //상품 삭제
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/admin/post-item/{id}")
-    public void deleteItem(@PathVariable Long id){
-        itemService.deleteItem(id);
-    }
+    
 
     //모두조회
-    @GetMapping("/list/items")
-    public List<ItemDTO> getAllItem(){
-        return itemService.getAllItem();
+    @GetMapping("/items")
+    public ResponseEntity<List<ItemDTO>> getItems(@RequestParam(required = false)String category){
+        List<ItemDTO> items;
+
+        if(category != null && !category.equals("전체보기")){
+            items = itemService.getItemsByCategory(category);
+        } else {
+            items = itemService.getAllItems();
+        }
+
+        return ResponseEntity.ok(items);
     }
+    
 
     //상세조회
-    @GetMapping("/list/items/{id}")
-    public ItemDTO getItemById(@PathVariable Long id){
-        return itemService.getItemById(id);
+    @GetMapping("/items/{id}")
+    public ResponseEntity<ItemDTO> getItemByID(@PathVariable Long id){
+        return itemService.getItemById(id)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
     }
 }

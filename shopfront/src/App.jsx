@@ -1,13 +1,14 @@
+import axios from "axios";
 import React, { useEffect } from "react";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import axios from "axios";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import AdminPage from "./pages/AdminPage";
-import ItemForm from "./pages/ItemForm";
 import { AuthProvider } from "./component/authContext";
 import Navbar from "./component/NavBar"; // 경로 확인
+import AdminPage from "./pages/AdminPage";
+import Home from "./pages/Home";
+import ItemRegistration from "./pages/ItemRegistration";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ItemDetail from "./pages/ItemDetail";
 
 function App() {
   useEffect(() => {
@@ -28,7 +29,8 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           {/* 아래 두 개는 새로 만들거나 필요시 추가 */}
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/item-form" element={<ItemForm />} />
+          <Route path="/itemregistration" element={<ItemRegistration />} />
+          <Route path="/items/:id" element={<ItemDetail />} />
         </Routes>
       </AuthProvider>
     </Router>

@@ -8,9 +8,9 @@ export default function AdminPage() {
 
   useEffect(() => {
     axiosInstance
-      .get("/user/me")
+      .get("/me")
       .then((res) => {
-        if (res.data.role !== "ROLE_ADMIN") {
+        if (res.data.role !== "ADMIN") {
           alert("관리자만 접근 가능합니다.");
           navigate("/");
         }
@@ -23,7 +23,7 @@ export default function AdminPage() {
   }, [navigate]);
 
   const goToProductForm = () => {
-    navigate("/admin/item-form");
+    navigate("/itemregistration");
   };
 
   return (
