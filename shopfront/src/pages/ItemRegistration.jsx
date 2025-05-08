@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { categories } from "../component/categories";
 
 export default function ItemRegistration() {
   const navigate = useNavigate();
@@ -12,6 +13,8 @@ export default function ItemRegistration() {
   });
 
   const [images, setImages] = useState([]);
+  const [previewImages, setPreviewImages] = useState([]);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
 
   useEffect(() => {
     axiosInstance
@@ -34,14 +37,26 @@ export default function ItemRegistration() {
   };
 
   const handleImageChange = (e) => {
-    setImages([...e.target.files]);
+    const files = [...e.target.files];
+    setImages(files);
+
+    const previews = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
+    setPreviewImages(previews);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formData = new FormData();
-    const itemBlob = new Blob([JSON.stringify(form)], {
+    const itemWithMain = {
+      ...form,
+      mainImg: mainImageIndex,
+    };
+
+    const itemBlob = new Blob([JSON.stringify(itemWithMain)], {
       type: "application/json",
     });
 
@@ -53,7 +68,7 @@ export default function ItemRegistration() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("상품 등록 성공");
-      navigate("/");
+      navigate("/admin/items");
     } catch (err) {
       console.error(err);
       alert("상품 등록 실패");
@@ -61,7 +76,7 @@ export default function ItemRegistration() {
   };
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
+    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "20px" }}>
       <h2>상품 등록</h2>
       <form onSubmit={handleSubmit}>
         <div>
@@ -104,17 +119,16 @@ export default function ItemRegistration() {
             required
           >
             <option value="">선택</option>
-            <option value="CPU">CPU</option>
-            <option value="GPU">GPU</option>
-            <option value="RAM">RAM</option>
-            <option value="Motherboard">Motherboard</option>
-            <option value="Storage">Storage</option>
-            <option value="Power Supply">Power Supply</option>
+            {categories.map((cat, idx) => (
+              <option key={idx} value={cat}>
+                {cat}
+              </option>
+            ))}
           </select>
         </div>
 
         <div>
-          <label>이미지</label>
+          <label>이미지 업로드</label>
           <input
             type="file"
             accept="image/*"
@@ -122,6 +136,31 @@ export default function ItemRegistration() {
             onChange={handleImageChange}
           />
         </div>
+
+        {previewImages.length > 0 && (
+          <div>
+            <p>대표 이미지 선택:</p>
+            {previewImages.map((img, index) => (
+              <div key={index} style={{ marginBottom: "10px" }}>
+                <img
+                  src={img.url}
+                  alt={`preview-${index}`}
+                  style={{ height: "100px" }}
+                />
+                <label style={{ marginLeft: "10px" }}>
+                  <input
+                    type="radio"
+                    name="mainImage"
+                    value={index}
+                    checked={mainImageIndex === index}
+                    onChange={() => setMainImageIndex(index)}
+                  />{" "}
+                  대표 이미지
+                </label>
+              </div>
+            ))}
+          </div>
+        )}
 
         <button type="submit">등록</button>
       </form>

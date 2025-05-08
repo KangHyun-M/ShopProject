@@ -60,8 +60,15 @@ export default function Home() {
                   >
                     <Card.Img
                       variant="top"
-                      src={product.imagePaths?.[0] || "/default.jpg"}
+                      src={
+                        product.imagePaths?.find((path) => !!path) ||
+                        "/images/default.png"
+                      }
                       style={{ objectFit: "contain", height: "200px" }}
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = "/images/default.png"; // 이미지가 깨진 경우도 대비
+                      }}
                     />
                     <Card.Body className="text-center">
                       <Card.Title className="fs-6 text-dark">

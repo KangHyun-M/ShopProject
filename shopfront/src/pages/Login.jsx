@@ -10,7 +10,7 @@ export default function Login() {
     e.preventDefault();
     try {
       await login(username, password); // ✅ 이것만 호출
-      // 로그인 성공은 authContext에서 처리됨
+      // 로그인 성공은 authContext에서 처리
     } catch (error) {
       console.error("로그인 요청 실패: ", error);
       alert("로그인 중 오류가 발생했습니다.");

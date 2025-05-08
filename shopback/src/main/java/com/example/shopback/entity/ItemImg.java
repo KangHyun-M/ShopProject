@@ -40,4 +40,7 @@ public class ItemImg {
 
     @Column(name = "modified_at",nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime modifiedAt;
+
+    @Column(name = "main_img",nullable = false)
+    private Boolean mainImg;
 }

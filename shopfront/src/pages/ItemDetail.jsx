@@ -46,7 +46,7 @@ export default function ItemDetail() {
         </Carousel>
       ) : (
         <Image
-          src="/default.jpg"
+          src="/images/default.png"
           alt="기본 이미지"
           fluid
           style={{

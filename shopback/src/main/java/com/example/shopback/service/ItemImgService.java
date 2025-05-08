@@ -25,38 +25,53 @@ public class ItemImgService {
     
     private final ItemImgRepository itemImgRepository;
 
-    public void uploadImg(Item item, List<MultipartFile> images){
+    public void uploadImg(Item item, List<MultipartFile> images, Integer mainImg) {
         String uploadDir = "C:/workspace_rct/ShopProject/shopfront/public/images";
-
-        for(MultipartFile image : images){
-            try{
+    
+        for (int i = 0; i < images.size(); i++) {
+            MultipartFile image = images.get(i);
+            try {
                 String original = image.getOriginalFilename();
                 if (original == null || original.isBlank()) {
                     original = "default.png";
                 }
+    
                 String safeFileName = UUID.randomUUID().toString() + "_" +
-                original.replaceAll("[^a-zA-Z0-9._-]", "_"); // 특수 문자 제거
-
+                        original.replaceAll("[^a-zA-Z0-9._-]", "_");
+    
                 String filePath = uploadDir + "/" + safeFileName;
                 String imgPath = "/images/" + safeFileName;
-
+    
                 Path path = Paths.get(filePath);
                 Files.createDirectories(path.getParent());
                 Files.write(path, image.getBytes());
-
+    
                 ItemImg itemImg = ItemImg.builder()
-                            .item(item)
-                            .imgPath(imgPath)
-                            .createdAt(LocalDateTime.now())
-                            .modifiedAt(LocalDateTime.now())
-                            .build();
-
-
-                        itemImgRepository.save(itemImg);
-            } catch (IOException e){
-                throw new RuntimeException("failed to save images", e);
+                        .item(item)
+                        .imgPath(imgPath)
+                        .mainImg(i == mainImg) // 대표 이미지 여부
+                        .createdAt(LocalDateTime.now())
+                        .modifiedAt(LocalDateTime.now())
+                        .build();
+    
+                itemImgRepository.save(itemImg);
+            } catch (IOException e) {
+                throw new RuntimeException("이미지 저장 실패", e);
             }
         }
     }
     
+    
+    //이미지 삭제
+    public void deleteImage(ItemImg img){
+        try{
+            Path path = Paths.get("C:/workspace_rct/ShopProject/shopfront/public" + img.getImgPath());
+            Files.deleteIfExists(path);
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+        Item item = img.getItem();
+        item.getItemImgs().remove(img); //JPA 연관관계에서 제거
+        itemImgRepository.delete(img);  //DB에서 제거
+    }
 }

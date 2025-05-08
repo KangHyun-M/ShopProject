@@ -1,0 +1,14 @@
+{
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Spring Boot-ShopBackApplication<shopback>",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "mainClass": "com.example.shopback.ShopBackApplication",
+      "projectName": "shopback",
+      "args": "",
+      "envFile": "${workspaceFolder}/.env"
+    }
+  ]
+}

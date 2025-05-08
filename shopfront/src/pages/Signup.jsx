@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../component/axiosInstance";
 import Swal from "sweetalert2";
-import "../static/Signup.css"; // 스타일 파일 임포트
+import "../css/Signup.css"; // 스타일 파일 임포트
 
 export default function Signup() {
   const [user, setUser] = useState({

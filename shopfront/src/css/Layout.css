@@ -1,0 +1,22 @@
+/* layout.css */
+.app-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.navbar-fixed {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.content-area {
+  margin-top: 60px; /* Navbar 높이 */
+  padding: 20px;
+  transition: margin-left 0.3s;
+}
+
+.with-sidebar {
+  margin-left: 200px; /* Sidebar 너비만큼 오른쪽으로 밀기 */
+}
