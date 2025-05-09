@@ -35,17 +35,17 @@ public class UserController {
     private BCryptPasswordEncoder passwordEncoder;
 
     
-    //회원가입
+    //회원가입  会員登録
     @PostMapping("/signup")
     public ResponseEntity<String> signUp(@RequestBody UserDTO userDTO){
         try{
-            //회원가입처리
+            //회원가입처리  会員登録処理
             userService.signUp(userDTO);
 
-            //회원가입 완료 메세지 반환
-            return ResponseEntity.ok("회원가입 완료");
+            //회원가입 완료 메세지 반환 会員登録完了後、完了メッセージ返還
+            return ResponseEntity.ok("会員登録完了");
         } catch (Exception e){
-            return ResponseEntity.status(500).body("회원가입중 오류가 발생했습니다");
+            return ResponseEntity.status(500).body("会員登録中、エラーが発生しました");
         }
     }
     
@@ -58,39 +58,39 @@ public class UserController {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
     
             if (passwordEncoder.matches(password, userDetails.getPassword())) {
-                // 인증 성공 시 Authentication 객체 생성
+                // 인증 성공 시 Authentication 객체 생성    認証に成功してからAuthentication客体生成
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities());
     
-                // SecurityContext에 저장
+                // SecurityContext에 저장   SecurityContextに貯蔵
                 SecurityContextHolder.getContext().setAuthentication(authentication);
     
-                // ✅ 세션에 SecurityContext 저장 (쿠키 발급 핵심 부분)
+                //세션에 SecurityContext 저장 (쿠키 발급 핵심 부분) セッションにSecurityContext貯蔵（クッキー発給の核心）
                 request.getSession(true).setAttribute(
                     "SPRING_SECURITY_CONTEXT",
                     SecurityContextHolder.getContext()
                 );
     
-                System.out.println("로그인 성공 - 아이디: " + username);
-                return ResponseEntity.ok("로그인 성공");
+                System.out.println("ログイン成功 - ID: " + username);
+                return ResponseEntity.ok("ログイン成功");
             } else {
-                System.out.println("로그인 실패 - 비밀번호 불일치: " + username);
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 또는 비밀번호가 틀렸습니다.");
+                System.out.println("ログイン失敗 - 安心番号不一致: " + username);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("ID又は安心番号不一致");
             }
         } catch (Exception e) {
-            System.err.println("로그인 처리 중 오류: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 에러");
+            System.err.println("ログイン中にエラーが発生しました: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("サーバーエラー");
         }
     }
 
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
         try {
-            // 세션 만료 처리
+            // 세션 만료 처리   セッションの満了処理
             request.getSession().invalidate();
-            return ResponseEntity.ok("로그아웃 성공");
+            return ResponseEntity.ok("ログアウト成功");
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("로그아웃 처리 중 오류 발생");
+            return ResponseEntity.status(500).body("ログアウト中にエラー発生しました");
         }
     }
 

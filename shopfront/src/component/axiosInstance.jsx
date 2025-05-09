@@ -5,7 +5,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // 쿠키를 자동으로 포함하여 세션 ID 전송
+  withCredentials: true, // 쿠키를 자동으로 포함하여 세션 ID 전송　クッキーを自動的に含めてセッションIDを送信します
 });
 
 export default axiosInstance;

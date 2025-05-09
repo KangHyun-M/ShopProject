@@ -21,20 +21,20 @@ public class CustomUserDetails implements UserDetails {
     public Collection<? extends GrantedAuthority> getAuthorities(){
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-        //Role enum에서 권한을 가져와서 설정
-        //Role Enum을 문자열로 변환하여 권한 부여
+        //Role enum에서 권한을 가져와서 설정    Role enumから権限を貰い、権限を設定
+        //Role Enum을 문자열로 변환하여 권한 부여　Role enumを文字列に変換し、権限を付与
         authorities.add(()-> "ROLE_" + user.getRole().name());
         return authorities;
     }
 
     @Override
     public String getPassword(){
-        return user.getPassword(); //비밀번호
+        return user.getPassword(); //비밀번호   安心番号/パスワード
     }
 
     @Override
     public String getUsername(){
-        return user.getUsername(); //이메일을 username으로 사용
+        return user.getUsername(); //이메일을 username으로 사용 メールアドレスをusernameに使う
     }
 
     public String getUserEmail(){
@@ -47,21 +47,21 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired(){
-        return true; //계정 만료되지 않음
+        return true; //계정 만료되지 않음       アカウントが満了されていない
     }
 
     @Override
     public boolean isAccountNonLocked(){
-        return true; //계정 잠금되지 않음
+        return true; //계정 잠금되지 않음       アカウントがロックされていない
     }
 
     @Override
     public boolean isCredentialsNonExpired(){
-        return true; //자격증명 만료되지 않음
+        return true; //자격증명 만료되지 않음   資格証明が満了されていない
     }
 
     @Override
     public boolean isEnabled(){
-        return true; //활성화된 계정
+        return true; //활성화된 계정            活性化されているアカウント
     }
 }

@@ -14,23 +14,23 @@ export default function AppNavbar() {
     <Navbar bg="light" expand="lg" className="shadow-sm mb-4">
       <Container>
         <Navbar.Brand as={Link} to="/" className="fw-bold">
-          제목 미정
+          タイトル未定
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="nav-links" />
         <Navbar.Collapse id="nav-links">
           <Nav className="me-auto">
             <Nav.Link as={Link} to="/">
-              홈
+              ホーム
             </Nav.Link>
-            <Nav.Link as={Link} to="/cart">
-              장바구니
+            <Nav.Link as={Link} to="/user/cart">
+              カート
             </Nav.Link>
             <Nav.Link as={Link} to="/mypage">
-              마이페이지
+              マイページ
             </Nav.Link>
             {user?.role === "ADMIN" && (
               <Nav.Link as={Link} to="/admin">
-                관리자페이지
+                アドミンページ
               </Nav.Link>
             )}
           </Nav>
@@ -43,12 +43,12 @@ export default function AppNavbar() {
                 align="end"
               >
                 <NavDropdown.Item onClick={handleLogout}>
-                  로그아웃
+                  ログアウト
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (
               <Nav.Link as={Link} to="/login">
-                로그인
+                ログイン
               </Nav.Link>
             )}
           </Nav>

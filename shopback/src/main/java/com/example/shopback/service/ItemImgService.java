@@ -49,20 +49,20 @@ public class ItemImgService {
                 ItemImg itemImg = ItemImg.builder()
                         .item(item)
                         .imgPath(imgPath)
-                        .mainImg(i == mainImg) // 대표 이미지 여부
+                        .mainImg(i == mainImg) // サムネイル
                         .createdAt(LocalDateTime.now())
                         .modifiedAt(LocalDateTime.now())
                         .build();
     
                 itemImgRepository.save(itemImg);
             } catch (IOException e) {
-                throw new RuntimeException("이미지 저장 실패", e);
+                throw new RuntimeException("画像の保存に失敗しました", e);
             }
         }
     }
     
     
-    //이미지 삭제
+    //이미지 삭제　イメージを削除
     public void deleteImage(ItemImg img){
         try{
             Path path = Paths.get("C:/workspace_rct/ShopProject/shopfront/public" + img.getImgPath());
@@ -71,7 +71,7 @@ public class ItemImgService {
             e.printStackTrace();
         }
         Item item = img.getItem();
-        item.getItemImgs().remove(img); //JPA 연관관계에서 제거
-        itemImgRepository.delete(img);  //DB에서 제거
+        item.getItemImgs().remove(img); //JPA リレーションシップから削除
+        itemImgRepository.delete(img);  //DB에서 제거   データベースから削除
     }
 }

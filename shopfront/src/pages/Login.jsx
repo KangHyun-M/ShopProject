@@ -1,38 +1,40 @@
 import React, { useState } from "react";
-import { useAuth } from "../component/authContext"; //로그인 상태 관리 hook 가져오기
+import { useLocation } from "react-router-dom";
+import { useAuth } from "../component/authContext";
 
 export default function Login() {
-  const { login } = useAuth(); // 로그인 상태 변경 함수
+  const { login } = useAuth();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const location = useLocation();
+
+  const from = location.state?.from?.pathname || "/"; //以前ページのパス
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await login(username, password); // ✅ 이것만 호출
-      // 로그인 성공은 authContext에서 처리
+      await login(username, password, from); //Fromパス
     } catch (error) {
-      console.error("로그인 요청 실패: ", error);
-      alert("로그인 중 오류가 발생했습니다.");
+      console.error("ログイン要求失敗: ", error);
+      alert("ログイン中にエラー発生しました");
     }
   };
 
   return (
     <div style={{ maxWidth: "400px", margin: "0 auto", padding: "20px" }}>
-      <h3 style={{ textAlign: "center" }}>로그인</h3>
+      <h3 style={{ textAlign: "center" }}>ログイン</h3>
       <form
         onSubmit={handleLogin}
         style={{ display: "flex", flexDirection: "column" }}
       >
         <div style={{ marginBottom: "15px" }}>
-          <label htmlFor="username">아이디</label>
+          <label htmlFor="username">ID</label>
           <input
             type="text"
             id="username"
-            name="username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="아이디"
+            placeholder="IDを入力してください"
             required
             style={{
               width: "100%",
@@ -44,14 +46,13 @@ export default function Login() {
           />
         </div>
         <div style={{ marginBottom: "15px" }}>
-          <label htmlFor="password">비밀번호</label>
+          <label htmlFor="password">パスワード</label>
           <input
             type="password"
             id="password"
-            name="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="비밀번호"
+            placeholder="パスワードを入力してください"
             required
             style={{
               width: "100%",
@@ -74,7 +75,7 @@ export default function Login() {
             cursor: "pointer",
           }}
         >
-          로그인
+          ログイン
         </button>
       </form>
     </div>

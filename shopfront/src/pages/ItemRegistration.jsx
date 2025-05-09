@@ -21,12 +21,12 @@ export default function ItemRegistration() {
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          alert("관리자만 접근 가능합니다.");
+          alert("管理者しかアクセスできません");
           navigate("/");
         }
       })
       .catch(() => {
-        alert("로그인이 필요합니다.");
+        alert("ログインしてください");
         navigate("/login");
       });
   }, [navigate]);
@@ -67,20 +67,20 @@ export default function ItemRegistration() {
       await axiosInstance.post("/admin/registration", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("상품 등록 성공");
+      alert("商品登録成功");
       navigate("/admin/items");
     } catch (err) {
       console.error(err);
-      alert("상품 등록 실패");
+      alert("商品登録失敗");
     }
   };
 
   return (
     <div style={{ maxWidth: "700px", margin: "0 auto", padding: "20px" }}>
-      <h2>상품 등록</h2>
+      <h2>商品登録</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>상품명</label>
+          <label>商品名</label>
           <input
             name="itemname"
             value={form.itemname}
@@ -90,7 +90,7 @@ export default function ItemRegistration() {
         </div>
 
         <div>
-          <label>설명</label>
+          <label>説明</label>
           <textarea
             name="description"
             value={form.description}
@@ -100,7 +100,7 @@ export default function ItemRegistration() {
         </div>
 
         <div>
-          <label>가격</label>
+          <label>価格</label>
           <input
             name="price"
             type="number"
@@ -111,14 +111,14 @@ export default function ItemRegistration() {
         </div>
 
         <div>
-          <label>카테고리</label>
+          <label>カテゴリー</label>
           <select
             name="category"
             value={form.category}
             onChange={handleChange}
             required
           >
-            <option value="">선택</option>
+            <option value="">選択</option>
             {categories.map((cat, idx) => (
               <option key={idx} value={cat}>
                 {cat}
@@ -128,7 +128,7 @@ export default function ItemRegistration() {
         </div>
 
         <div>
-          <label>이미지 업로드</label>
+          <label>イメージアップロード</label>
           <input
             type="file"
             accept="image/*"
@@ -139,7 +139,7 @@ export default function ItemRegistration() {
 
         {previewImages.length > 0 && (
           <div>
-            <p>대표 이미지 선택:</p>
+            <p>サムネイル選択:</p>
             {previewImages.map((img, index) => (
               <div key={index} style={{ marginBottom: "10px" }}>
                 <img
@@ -155,14 +155,14 @@ export default function ItemRegistration() {
                     checked={mainImageIndex === index}
                     onChange={() => setMainImageIndex(index)}
                   />{" "}
-                  대표 이미지
+                  サムネイル
                 </label>
               </div>
             ))}
           </div>
         )}
 
-        <button type="submit">등록</button>
+        <button type="submit">登録</button>
       </form>
     </div>
   );

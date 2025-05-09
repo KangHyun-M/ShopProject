@@ -9,15 +9,15 @@ import com.example.shopback.entity.User;
 
 public interface UserRepository extends JpaRepository<User,Long> {
     
-    //이메일으로 사용자찾기
+    //이메일으로 사용자찾기     メールアドレスからユーザーを照会
     Optional<User> findByUsername(String username);
 
-    //닉네임으로 사용자찾기
+    //닉네임으로 사용자찾기     ニックネームからユーザーを照会
     Optional<User> findByUsernic(String usernic);
 
-    //이메일 중복확인
+    //이메일 중복확인           メールアドレスの重複確認
     boolean existsByUsername(String username);
 
-    //닉네임 중복확인
+    //닉네임 중복확인           ニックネームの重複確認
     boolean existsByUsernic(String usernic);
 }

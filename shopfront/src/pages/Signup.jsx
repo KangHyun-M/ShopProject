@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../component/axiosInstance";
 import Swal from "sweetalert2";
-import "../css/Signup.css"; // 스타일 파일 임포트
+import "../css/Signup.css";
 
 export default function Signup() {
   const [user, setUser] = useState({
@@ -19,9 +19,9 @@ export default function Signup() {
   const [isUsernicValid, setIsUsernicValid] = useState(false);
   const [isAuthValid, setIsAuthValid] = useState(false);
 
-  // 비밀번호 유효성 검사
+  // 비밀번호 유효성 검사 パスワードバリデーション
   const validatePasswords = useCallback(() => {
-    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/; // 영어 대소문자 + 숫자 + 특수문자, 8~15자
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/; //英語大小文字+数字+特殊文字の 8~15字
     const isPwValid = passwordRegex.test(user.password);
     const isConfirmPwValid = user.password === user.confirmPass;
 
@@ -29,23 +29,23 @@ export default function Signup() {
     setIsConfirmPwValid(isConfirmPwValid);
   }, [user.password, user.confirmPass]);
 
-  // 닉네임 유효성 검사
+  // 닉네임 유효성 검사　ニックネームバリデーション
   const validateUsernic = useCallback(() => {
-    const usernicRegex = /^[a-zA-Z0-9]{1,15}$/; // 영어 대소문자 + 숫자, 15자 이하
+    const usernicRegex = /^[a-zA-Z0-9]{1,15}$/; // 英語大小文字+数字, 15字以下
     setIsUsernicValid(usernicRegex.test(user.usernic));
   }, [user.usernic]);
 
-  // 이메일 유효성 검사
+  // 이메일 유효성 검사 メールアドレスバリデーション
   const validateUsername = useCallback(() => {
-    const usernameRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/; // 이메일 형식 검사
-    setIsUsernameValid(usernameRegex.test(user.username)); // 유효성 검사 수행
+    const usernameRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    setIsUsernameValid(usernameRegex.test(user.username));
   }, [user.username]);
 
   useEffect(() => {
     validatePasswords();
     validateUsernic();
     validateUsername();
-  }, [validatePasswords, validateUsernic, validateUsername]); // 의존성 배열에 함수 추가
+  }, [validatePasswords, validateUsernic, validateUsername]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -77,18 +77,18 @@ export default function Signup() {
       if (res.data) {
         Swal.fire({
           icon: "error",
-          title: "이미 사용중인 이메일입니다",
+          title: "存在するメールアドレスです",
         });
       } else {
         Swal.fire({
           icon: "success",
-          title: "사용 가능한 이메일입니다",
+          title: "使えるメールアドレスです",
         });
       }
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "이메일 확인중 오류가 발생했습니다",
+        title: "メールアドレス確認中にエラー発生しました",
       });
     }
   };
@@ -99,7 +99,7 @@ export default function Signup() {
     ) {
       Swal.fire({
         icon: "warning",
-        title: "이메일 형식에 맞게 입력해주세요",
+        title: "正しいメールアドレスを入力してください",
       });
       return;
     }
@@ -110,13 +110,13 @@ export default function Signup() {
       });
       Swal.fire({
         icon: "success",
-        title: "인증번호를 이메일로 전송했습니다",
+        title: "メールアドレスに認証番号を送信しました",
       });
       setIsAuthValid(true);
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "이메일로 인증번호 전송중 오류가 발생했습니다",
+        title: "メールアドレスに認証番号を送信中にエラー発生しました",
       });
     }
   };
@@ -130,19 +130,19 @@ export default function Signup() {
       if (res.data) {
         Swal.fire({
           icon: "success",
-          title: "인증이 완료되었습니다",
+          title: "認証完了",
         });
         setIsAuthValid(true);
       } else {
         Swal.fire({
           icon: "error",
-          title: "인증번호가 틀렸습니다",
+          title: "正しい認証番号を入力してください",
         });
       }
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "인증 확인중 오류가 발생했습니다",
+        title: "認証中にエラー発生しました",
       });
     }
   };
@@ -155,20 +155,20 @@ export default function Signup() {
       if (res.data) {
         Swal.fire({
           icon: "error",
-          title: "이미 존재하는 닉네임입니다",
+          title: "存在するニックネームです",
         });
         setIsUsernicValid(false);
       } else {
         Swal.fire({
           icon: "success",
-          title: "사용 가능한 닉네임입니다",
+          title: "使えるニックネームです",
         });
         setIsUsernicValid(true);
       }
     } catch (error) {
       Swal.fire({
         icon: "error",
-        title: "닉네임 중복 확인중 오류가 발생했습니다",
+        title: "ニックネームの重複確認中にエラー発生しました",
       });
       setIsUsernicValid(false);
     }
@@ -180,7 +180,7 @@ export default function Signup() {
     if (!isAuthValid) {
       Swal.fire({
         icon: "warning",
-        title: "이메일 인증이 완료되지 않았습니다",
+        title: "メールアドレスに認証を完了してください",
       });
       return;
     }
@@ -190,12 +190,12 @@ export default function Signup() {
       await axiosInstance.post("/signup", userPayload);
       Swal.fire({
         icon: "success",
-        title: "회원가입 완료",
-        text: "회원가입이 완료되었습니다",
+        title: "会員登録完了",
+        text: "会員登録完了",
       });
       window.location.href = "/";
     } catch (error) {
-      console.log("회원가입 에러:", error.response?.data || error.message);
+      console.log("会員登録エラー:", error.response?.data || error.message);
     }
   };
 
@@ -212,9 +212,9 @@ export default function Signup() {
   return (
     <div className="signup-container">
       <div className="signup-form">
-        <h2>회원가입</h2>
+        <h2>会員登録</h2>
         <form onSubmit={handleSumbit}>
-          {/* 아이디 중복 확인 */}
+          {/* ID重複確認 */}
           <div className="form-group">
             <input
               type="email"
@@ -225,85 +225,83 @@ export default function Signup() {
               required
             />
             <button type="button" onClick={checkUsername}>
-              이메일 중복 확인
+              メール重複確認
             </button>
           </div>
 
-          {/* 인증번호 입력 */}
+          {/* 認証番号入力 */}
           <div className="form-group button-group">
             <input
               type="text"
               id="verificationCode"
               value={user.verificationCode}
               onChange={handleChange}
-              placeholder="인증번호 입력"
+              placeholder="認証番号を入力してください"
               disabled={!isUsernameValid}
             />
             <button type="button" onClick={sendAuth}>
-              인증번호 발송
+              認証番号送信
             </button>
             <button type="button" onClick={verifyAuth} disabled={!isAuthValid}>
-              인증번호 확인
+              認証番号確認
             </button>
           </div>
 
-          {/* 비밀번호 */}
+          {/* パスワード */}
           <div className="form-group">
             <input
               type="password"
               id="password"
               value={user.password}
               onChange={handleChange}
-              placeholder="비밀번호"
+              placeholder="パスワードを入力してください"
               required
             />
             {user.password && !isPwValid && (
               <span className="error-message">
-                비밀번호는 8자 이상, 15자 이하, 영어 대소문자, 숫자, 특수문자를
-                포함해야 합니다.
+                パスワードは英語の大小文字、数字、特殊文字を含めた8字以上、15字以下
+                にしてください
               </span>
             )}
           </div>
 
-          {/* 비밀번호 확인 */}
+          {/* パスワード確認 */}
           <div className="form-group">
             <input
               type="password"
               id="confirmPass"
               value={user.confirmPass}
               onChange={handleChange}
-              placeholder="비밀번호 확인"
+              placeholder="パスワード確認"
               required
             />
             {user.confirmPass && !isConfirmPwValid && (
-              <span className="error-message">
-                비밀번호가 일치하지 않습니다
-              </span>
+              <span className="error-message">パスワードが一致しません</span>
             )}
           </div>
 
-          {/* 닉네임 입력 */}
+          {/* ニックネーム */}
           <div className="form-group">
             <input
               type="text"
               id="usernic"
               value={user.usernic}
               onChange={handleChange}
-              placeholder="닉네임"
+              placeholder="ニックネームを入力してください"
               required
             />
             {user.usernic && !isUsernicValid && (
               <span className="error-message">
-                닉네임은 영어 대소문자와 숫자 조합으로 15자 이내여야 합니다.
+                ニックネームは英語の大小文字と数字の15字以内でしてください
               </span>
             )}
             <button type="button" onClick={checkUserNic}>
-              닉네임 중복 확인
+              ニックネーム重複確認
             </button>
           </div>
 
           <button type="submit" disabled={!validateForm()}>
-            회원가입
+            会員登録
           </button>
         </form>
       </div>

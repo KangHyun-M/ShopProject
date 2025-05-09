@@ -20,8 +20,8 @@ public class EmailService {
 
     public String sendVerificationCode(String code){
         String verificationCode = generateCode();
-        String subject ="인증번호";
-        String message = "인증번호는 " + verificationCode + "입니다";
+        String subject ="認証番号";
+        String message = "認証番号は " + verificationCode + "です";
 
         sendCode(code,subject,message);
         return verificationCode;
@@ -35,15 +35,15 @@ public class EmailService {
             message.setText(text);
             javaMailSender.send(message);
         } catch (MailException e) {
-            throw new RuntimeException("이메일 전송 중 오류가 발생했습니다.", e);
+            throw new RuntimeException("メール送信中にエラー発生しました", e);
         }
     }
 
-    // 이메일-코드 저장소 (간단히 메모리에 저장, 실제 운영에서는 Redis 등 사용 권장)
+    // メール認証コードを保存　、メモリーに保存する
     private final Map<String, String> verificationCodes = new ConcurrentHashMap<>();
 
 
-    // 인증번호 검증
+    // 인증번호 검증    パスワード/安心番号を検証
     public boolean verifyCode(String username, String inputCode) {
         String savedCode = verificationCodes.get(username);
         return savedCode != null && savedCode.equals(inputCode);
@@ -63,7 +63,7 @@ public class EmailService {
             }
             return sb.toString();
         } catch (Exception e) {
-            throw new RuntimeException("인증번호 생성 중 오류가 발생했습니다.", e);
+            throw new RuntimeException("認証番号生成中にエラー発生しました", e);
         }
     }
 }

@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useEffect } from "react";
 import { BrowserRouter as Router } from "react-router-dom";
 import { AuthProvider } from "./component/authContext";
-import AppLayout from "./AppLayout"; // 레이아웃 컴포넌트로 분리
+import AppLayout from "./AppLayout";
 
 function App() {
   useEffect(() => {

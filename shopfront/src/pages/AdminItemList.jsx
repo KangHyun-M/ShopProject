@@ -7,7 +7,7 @@ import { categories } from "../component/categories";
 
 export default function AdminItemList() {
   const [items, setItems] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("전체 보기");
+  const [selectedCategory, setSelectedCategory] = useState("Total");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,64 +15,64 @@ export default function AdminItemList() {
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          alert("관리자만 접근 가능합니다.");
+          alert("管理者しかアクセスできません");
           navigate("/");
         }
       })
       .catch(() => {
-        alert("로그인이 필요합니다.");
+        alert("ログインしてください");
         navigate("/login");
       });
 
     axiosInstance
-      .get("/items") // 관리자 전용이면 "/admin/items"로 바꾸세요
+      .get("/items")
       .then((res) => setItems(res.data))
-      .catch((err) => console.error("상품 불러오기 실패", err));
+      .catch((err) => console.error("商品リスト取得失敗", err));
   }, [navigate]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    if (!window.confirm("本当に削除しますか?")) return;
 
     try {
       await axiosInstance.put(`/admin/items/${id}/delete`);
-      alert("삭제되었습니다.");
-      window.location.reload(); // 또는 setItems()로 갱신
+      alert("削除しました");
+      window.location.reload(); // 又は setItems()で更新
     } catch (err) {
-      console.error("삭제 실패", err);
-      alert("삭제에 실패했습니다.");
+      console.error("削除失敗", err);
+      alert("削除に失敗しました");
     }
   };
 
   const handleRestore = async (id) => {
     try {
       await axiosInstance.put(`/admin/items/${id}/restore`);
-      alert("복구되었습니다.");
+      alert("復旧しました");
       window.location.reload();
     } catch (err) {
-      console.error("복구 실패", err);
-      alert("복구에 실패했습니다.");
+      console.error("復旧失敗", err);
+      alert("復旧に失敗しました");
     }
   };
 
   const filteredItems =
-    selectedCategory === "전체 보기"
+    selectedCategory === "Total"
       ? items
       : items.filter((item) => item.category === selectedCategory);
 
   return (
     <Container className="py-4">
-      <h2 className="mb-4 text-center">상품 관리</h2>
+      <h2 className="mb-4 text-center">商品管理</h2>
 
       <Row className="mb-4 justify-content-center">
         <Col xs="auto">
           <Button
             size="sm"
             variant={
-              selectedCategory === "전체 보기" ? "primary" : "outline-secondary"
+              selectedCategory === "Total" ? "primary" : "outline-secondary"
             }
-            onClick={() => setSelectedCategory("전체 보기")}
+            onClick={() => setSelectedCategory("Total")}
           >
-            전체 보기
+            Total
           </Button>
         </Col>
         {categories.map((category, idx) => (
@@ -108,7 +108,7 @@ export default function AdminItemList() {
                   <Card.Title className="fs-6">{item.itemname}</Card.Title>
                   <Card.Text className="text-muted">{item.category}</Card.Text>
                   <Card.Text className="fw-bold text-primary">
-                    {item.price.toLocaleString()}원
+                    {item.price.toLocaleString()}円
                   </Card.Text>
                 </Card.Body>
                 <Card.Footer className="text-center bg-white">
@@ -118,7 +118,7 @@ export default function AdminItemList() {
                       variant="success"
                       onClick={() => handleRestore(item.id)}
                     >
-                      복구
+                      復旧
                     </Button>
                   ) : (
                     <>
@@ -128,14 +128,14 @@ export default function AdminItemList() {
                         className="me-2"
                         onClick={() => navigate(`/admin/items/edit/${item.id}`)}
                       >
-                        수정
+                        修正
                       </Button>
                       <Button
                         size="sm"
                         variant="outline-danger"
                         onClick={() => handleDelete(item.id)}
                       >
-                        삭제
+                        削除
                       </Button>
                     </>
                   )}
@@ -145,7 +145,7 @@ export default function AdminItemList() {
           ))
         ) : (
           <p className="text-center text-muted">
-            해당 카테고리에 상품이 없습니다.
+            該当するカテゴリーに商品が存在しません
           </p>
         )}
       </Row>

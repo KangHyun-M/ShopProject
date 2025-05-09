@@ -1,4 +1,3 @@
-// authContext.jsx
 import axiosInstance from "./axiosInstance";
 import {
   createContext,
@@ -24,58 +23,59 @@ export const AuthProvider = ({ children }) => {
         setUser(res.data);
       } else {
         setUser(null);
-        console.warn("유저 정보를 불러올 수 없습니다.");
+        console.warn("ユーザー情報を取得できません");
       }
     } catch (err) {
-      console.error("유저 정보 불러오기 실패", err);
+      console.error("ユーザー情報の取得失敗", err);
       setUser(null);
-      console.warn("로그인 상태를 확인할 수 없습니다. 다시 로그인 해주세요.");
+      console.warn(
+        "ログイン状態を確認できません。もう一度ログインしてください。"
+      );
     }
   }, [isLoggedIn]);
 
-  const login = async (username, password) => {
-    // ✅ username과 password 파라미터 추가
+  const login = async (username, password, from = "/") => {
     try {
       const res = await axiosInstance.post("/login", { username, password });
-      console.log("authContext 로그인 요청 응답:", res);
+      console.log("authContext ログインリクエストのレスポンス :", res);
       if (res.status === 200) {
         setIsLoggedIn(true);
-        localStorage.setItem("token", "true"); // 로컬 스토리지에 토큰 저장
-        await fetchUser(); // 유저 정보 바로 가져오기
-        alert("로그인 성공!"); // 로그인 성공 메시지 표시
-        navigate("/"); // 로그인 후 메인페이지로 리디렉션
-        console.log("로그인 시도 - 아이디:", username, "비밀번호:", password); // ✅ 전달받은 정보 로깅
-        // 필요하다면 다른 로직 추가 (예: 로컬 스토리지에 일부 사용자 정보 저장)
+        localStorage.setItem("token", "true");
+        await fetchUser();
+        alert("ログイン成功!");
+        console.log("ログイン試行 - メールアドレス:", username);
+
+        // 이전 페이지로 이동 以前のページに遷移
+        navigate(from, { replace: true });
       } else {
-        alert("로그인 실패!");
-        console.error("로그인 실패 - 서버 응답:", res); // 서버 응답 로깅
+        alert("ログイン失敗!");
+        console.error("ログイン失敗 - サーバー応答:", res);
       }
     } catch (err) {
-      console.error("로그인 요청 실패", err);
-      alert("로그인 실패!");
+      console.error("ログイン要求失敗", err);
+      alert("ログイン失敗!");
     }
   };
 
   const logout = async () => {
     try {
-      const res = await axiosInstance.post("/logout"); // 로그아웃 API 호출
+      const res = await axiosInstance.post("/logout");
       if (res.status === 200 || res.status === 204) {
-        localStorage.removeItem("token"); // 로컬 스토리지에서 토큰 제거
-        setIsLoggedIn(false); // 로그인 상태 false로 설정
-        setUser(null); // 유저 정보 초기화
-        alert("로그아웃 되었습니다");
-        navigate("/"); // 로그아웃 후 메인페이지로 리디렉션
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
+        setUser(null);
+        alert("ログアウトしました");
+        navigate("/");
       } else {
-        console.error("로그아웃 실패 - 서버 응답 오류", res);
-        alert("로그아웃 실패");
+        console.error("ログアウト失敗 - サーバーエラー", res);
+        alert("ログアウト失敗");
       }
     } catch (err) {
-      console.error("로그아웃 요청 실패", err);
-      alert("로그아웃 실패");
+      console.error("ログアウト要求失敗", err);
+      alert("ログアウト失敗");
     }
   };
 
-  // 컴포넌트 마운트 시 세션 확인 및 초기 사용자 정보 로드
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -91,25 +91,23 @@ export const AuthProvider = ({ children }) => {
         if (err.response?.status === 401) {
           setIsLoggedIn(false);
           setUser(null);
-          // 401 오류는 로그인되지 않은 상태이므로 별도의 알림 없이 상태만 업데이트
           return;
         }
-        console.error("세션 확인 실패", err);
+        console.error("セッション確認失敗", err);
         setIsLoggedIn(false);
         setUser(null);
-        console.warn("로그인 상태를 확인할 수 없습니다.");
+        console.warn("ログイン状態を確認できません");
       }
     };
 
     checkSession();
   }, []);
 
-  // 로그인 상태가 변경될 때 (주로 로그인/로그아웃 시) 사용자 정보 갱신
   useEffect(() => {
     if (isLoggedIn) {
       fetchUser();
     } else {
-      setUser(null); // 로그아웃 상태로 설정
+      setUser(null);
     }
   }, [isLoggedIn, fetchUser]);
 

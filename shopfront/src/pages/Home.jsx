@@ -4,7 +4,7 @@ import axiosInstance from "../component/axiosInstance";
 import { Link } from "react-router-dom";
 
 const categories = [
-  "전체 보기",
+  "Total",
   "CPU",
   "GPU",
   "RAM",
@@ -15,21 +15,21 @@ const categories = [
 
 export default function Home() {
   const [products, setProducts] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("전체 보기");
+  const [selectedCategory, setSelectedCategory] = useState("Total");
 
   useEffect(() => {
     axiosInstance.get("/items").then((res) => setProducts(res.data));
   }, []);
 
   const filteredProducts =
-    selectedCategory === "전체 보기"
+    selectedCategory === "Total"
       ? products
       : products.filter((p) => p.category === selectedCategory);
 
   return (
     <>
       <Container className="py-4">
-        <h1 className="mb-4 text-center">컴퓨터 부품 샵</h1>
+        <h1 className="mb-4 text-center">パソコン、パーツ</h1>
 
         <Row className="mb-4 justify-content-center">
           {categories.map((category, idx) => (
@@ -67,7 +67,7 @@ export default function Home() {
                       style={{ objectFit: "contain", height: "200px" }}
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = "/images/default.png"; // 이미지가 깨진 경우도 대비
+                        e.target.src = "/images/default.png";
                       }}
                     />
                     <Card.Body className="text-center">
@@ -75,21 +75,16 @@ export default function Home() {
                         {product.itemname}
                       </Card.Title>
                       <Card.Text className="fw-bold text-primary">
-                        {product.price}원
+                        {product.price}円
                       </Card.Text>
                     </Card.Body>
                   </Link>
-                  <Card.Footer className="bg-white border-0 text-center">
-                    <Button size="sm" variant="outline-primary">
-                      장바구니 담기
-                    </Button>
-                  </Card.Footer>
                 </Card>
               </Col>
             ))
           ) : (
             <p className="text-muted text-center">
-              해당 카테고리에 상품이 없습니다.
+              該当するカテゴリーに商品が存在しません
             </p>
           )}
         </Row>

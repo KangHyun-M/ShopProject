@@ -7,18 +7,18 @@ export default function SideBar() {
 
   const menu = [
     {
-      title: "회원관리",
+      title: "会員管理",
       submenu: [
-        { name: "회원 목록", path: "/admin/users" },
-        { name: "회원 등록", path: "/admin/users/create" },
+        { name: "会員リスト", path: "/admin/users" },
+        { name: "会員登録", path: "/admin/users/create" },
       ],
     },
     {
-      title: "상품관리",
+      title: "商品管理",
       submenu: [
-        { name: "상품 목록", path: "/admin/items" },
-        { name: "상품 등록", path: "/admin/itemregistration" },
-        { name: "상품 복구", path: "/admin/items/deleted" },
+        { name: "商品リスト", path: "/admin/items" },
+        { name: "商品登録", path: "/admin/itemregistration" },
+        { name: "商品復旧", path: "/admin/items/deleted" },
       ],
     },
   ];

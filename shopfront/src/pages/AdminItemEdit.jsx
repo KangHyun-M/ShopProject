@@ -24,20 +24,20 @@ export default function AdminItemEdit() {
   });
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
-  const [mainImage, setMainImage] = useState(""); // 대표 이미지 경로
+  const [mainImage, setMainImage] = useState(""); // サムネイルのパス
 
   useEffect(() => {
-    // 관리자 체크 및 데이터 로드
+    // 관리자 체크 및 데이터 로드 アドミンチェック及びデータのロード
     axiosInstance
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          alert("관리자만 접근 가능합니다.");
+          alert("管理者しかアクセスできません");
           navigate("/");
         }
       })
       .catch(() => {
-        alert("로그인이 필요합니다.");
+        alert("ログインしてください");
         navigate("/login");
       });
 
@@ -55,7 +55,7 @@ export default function AdminItemEdit() {
         setMainImage(res.data.mainImage || res.data.imagePaths?.[0] || "");
       })
       .catch(() => {
-        alert("상품 정보를 불러오지 못했습니다.");
+        alert("該当する商品は存在しません");
         navigate("/admin/items");
       });
   }, [id, navigate]);
@@ -73,6 +73,7 @@ export default function AdminItemEdit() {
     setExistingImages(existingImages.filter((img) => img !== url));
     if (mainImage === url) {
       setMainImage(""); // 대표 이미지로 지정되어 있던 이미지가 삭제될 경우 초기화
+      //サムネイルに登録されていたイメージが削除される場合、初期化
     }
   };
 
@@ -96,29 +97,29 @@ export default function AdminItemEdit() {
       await axiosInstance.put(`/admin/items/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("수정 완료");
+      alert("修正完了");
       navigate("/admin/items");
     } catch (err) {
       console.error(err);
-      alert("수정 실패");
+      alert("修正失敗");
     }
   };
 
-  if (!item) return <p className="text-center mt-5">로딩 중...</p>;
+  if (!item) return <p className="text-center mt-5">Now Loading...</p>;
 
   return (
     <Container className="py-4" style={{ maxWidth: "700px" }}>
-      <h3 className="mb-4 text-center">상품 정보 수정</h3>
+      <h3 className="mb-4 text-center">商品情報修正</h3>
 
-      {/* 기존 이미지 미리보기 */}
+      {/* サムネイル */}
       <Card className="mb-4 p-3">
-        <h5>기존 이미지</h5>
+        <h5>既存の画像</h5>
         <Row>
           {existingImages.map((img, idx) => (
             <Col key={idx} xs={6} md={4} className="mb-3 text-center">
               <Image
                 src={img}
-                alt={`기존 이미지 ${idx + 1}`}
+                alt={`既存の画像 ${idx + 1}`}
                 thumbnail
                 style={{ height: "150px", objectFit: "contain" }}
               />
@@ -129,12 +130,12 @@ export default function AdminItemEdit() {
                   className="me-2"
                   onClick={() => handleImageDelete(img)}
                 >
-                  삭제
+                  削除
                 </Button>
                 <Form.Check
                   type="radio"
                   name="mainImage"
-                  label="대표 이미지"
+                  label="サムネイル"
                   checked={mainImage === img}
                   onChange={() => setMainImage(img)}
                 />
@@ -144,10 +145,10 @@ export default function AdminItemEdit() {
         </Row>
       </Card>
 
-      {/* 수정 폼 */}
+      {/* 修正フォーム */}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3">
-          <Form.Label>상품명</Form.Label>
+          <Form.Label>商品名</Form.Label>
           <Form.Control
             type="text"
             name="itemname"
@@ -157,7 +158,7 @@ export default function AdminItemEdit() {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>설명</Form.Label>
+          <Form.Label>説明</Form.Label>
           <Form.Control
             as="textarea"
             name="description"
@@ -168,7 +169,7 @@ export default function AdminItemEdit() {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>가격</Form.Label>
+          <Form.Label>価格</Form.Label>
           <Form.Control
             type="number"
             name="price"
@@ -178,13 +179,13 @@ export default function AdminItemEdit() {
         </Form.Group>
 
         <Form.Group className="mb-3">
-          <Form.Label>카테고리</Form.Label>
+          <Form.Label>カテゴリー</Form.Label>
           <Form.Select
             name="category"
             value={form.category}
             onChange={handleChange}
           >
-            <option value="">선택</option>
+            <option value="">選択</option>
             {categories.map((cat, idx) => (
               <option key={idx} value={cat}>
                 {cat}
@@ -194,7 +195,7 @@ export default function AdminItemEdit() {
         </Form.Group>
 
         <Form.Group className="mb-4">
-          <Form.Label>추가 이미지 업로드</Form.Label>
+          <Form.Label>追加イメージアップロード</Form.Label>
           <Form.Control
             type="file"
             accept="image/*"
@@ -205,7 +206,7 @@ export default function AdminItemEdit() {
 
         <div className="text-center">
           <Button type="submit" variant="primary">
-            수정 완료
+            修正完了
           </Button>
         </div>
       </Form>

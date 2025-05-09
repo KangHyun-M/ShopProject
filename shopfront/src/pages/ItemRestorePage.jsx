@@ -9,24 +9,26 @@ export default function ItemRestorePage() {
     axiosInstance
       .get("/admin/items/deleted")
       .then((res) => setItems(res.data))
-      .catch((err) => console.error("삭제된 상품 불러오기 실패", err));
+      .catch((err) =>
+        console.error("削除された商品データの取得に失敗しました", err)
+      );
   }, []);
 
   const handleRestore = (id) => {
-    if (window.confirm("해당 상품을 복구하시겠습니까?")) {
+    if (window.confirm("該当する商品を復旧しますか?")) {
       axiosInstance
         .put(`/admin/items/${id}/retore`)
         .then(() => {
-          alert("복구 완료");
+          alert("復旧完了");
           setItems((prev) => prev.filter((item) => item.id !== id));
         })
-        .catch(() => alert("복구 실패"));
+        .catch(() => alert("復旧失敗"));
     }
   };
 
   return (
     <Container className="py-4">
-      <h2 className="mb-4 text-center">삭제된 상품 복구</h2>
+      <h2 className="mb-4 text-center">削除された商品を復旧</h2>
       <Row>
         {items.length > 0 ? (
           items.map((item) => (
@@ -34,14 +36,14 @@ export default function ItemRestorePage() {
               <Card className="h-100 shadow-sm">
                 <Card.Img
                   variant="top"
-                  src={item.imagePaths?.[0] || "/default.png"}
+                  src={item.imagePaths?.[0] || "/images/default.png"}
                   style={{ objectFit: "cover", height: "180px" }}
                 />
                 <Card.Body className="text-center">
                   <Card.Title className="fs-6">{item.itemname}</Card.Title>
                   <Card.Text className="text-muted">{item.category}</Card.Text>
                   <Card.Text className="fw-bold text-primary">
-                    {item.price.toLocaleString()}원
+                    {item.price.toLocaleString()}円
                   </Card.Text>
                 </Card.Body>
                 <Card.Footer className="text-center bg-white">
@@ -50,14 +52,14 @@ export default function ItemRestorePage() {
                     variant="success"
                     onClick={() => handleRestore(item.id)}
                   >
-                    복구
+                    復旧
                   </Button>
                 </Card.Footer>
               </Card>
             </Col>
           ))
         ) : (
-          <p className="text-center text-muted">삭제된 상품이 없습니다.</p>
+          <p className="text-center text-muted">削除された商品が存在しません</p>
         )}
       </Row>
     </Container>

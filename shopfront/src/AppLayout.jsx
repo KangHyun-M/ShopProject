@@ -1,4 +1,3 @@
-// AppLayout.jsx
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./component/NavBar";
@@ -9,10 +8,11 @@ import Signup from "./pages/Signup";
 import ItemDetail from "./pages/ItemDetail";
 import ItemRegistration from "./pages/ItemRegistration";
 import AdminPage from "./pages/AdminPage";
-import "./css/Layout.css"; // 스타일 분리
+import "./css/Layout.css";
 import AdminItemList from "./pages/AdminItemList";
 import AdminItemEdit from "./pages/AdminItemEdit";
 import ItemRestorePage from "./pages/ItemRestorePage";
+import CartPage from "./pages/CartPage";
 
 export default function AppLayout() {
   const location = useLocation();
@@ -32,6 +32,7 @@ export default function AppLayout() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/items/:id" element={<ItemDetail />} />
+          <Route path="/user/cart" element={<CartPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/admin/items" element={<AdminItemList />} />
           <Route path="/admin/items/edit/:id" element={<AdminItemEdit />} />

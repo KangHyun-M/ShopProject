@@ -11,13 +11,13 @@ export default function AdminPage() {
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          alert("관리자만 접근 가능합니다.");
+          alert("管理者しかアクセスできません");
           navigate("/");
         }
       })
       .catch((err) => {
         console.error(err);
-        alert("로그인이 필요합니다.");
+        alert("ログインしてください");
         navigate("/login");
       });
   }, [navigate]);
@@ -28,9 +28,9 @@ export default function AdminPage() {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>관리자 페이지</h2>
-      <p>관리자만 접근 가능합니다.</p>
-      <button onClick={goToProductForm}>상품 작성 페이지로 이동</button>
+      <h2>管理者ページ</h2>
+      <p>管理者しかアクセスできません</p>
+      <button onClick={goToProductForm}>商品登録ページに遷移</button>
     </div>
   );
 }
