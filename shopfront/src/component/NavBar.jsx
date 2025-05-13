@@ -25,7 +25,7 @@ export default function AppNavbar() {
             <Nav.Link as={Link} to="/user/cart">
               カート
             </Nav.Link>
-            <Nav.Link as={Link} to="/mypage">
+            <Nav.Link as={Link} to="/mypage/info">
               マイページ
             </Nav.Link>
             {user?.role === "ADMIN" && (

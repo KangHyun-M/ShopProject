@@ -36,9 +36,7 @@ public class CartService {
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new RuntimeException("該当するユーザーは存在しません"));
 
-    List<CartItem> cartItems = cartRepository.findByUser_Id(user.getId()).stream()
-                        .filter(item -> !item.isDeleted())
-                        .toList();
+    List<CartItem> cartItems = cartRepository.fetchActiveCartItemsWithValidItem(user.getId());
 
     List<CartItemDTO> dtoList = new ArrayList<>();
 

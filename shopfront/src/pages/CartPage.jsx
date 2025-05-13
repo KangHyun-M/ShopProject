@@ -1,37 +1,43 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card, Button, Modal } from "react-bootstrap";
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState([]);
+  const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
-  //로그인 유저 확인 및 장바구니 불러오기   ユーザー確認及びカート取得
+  // 유저 확인 + 장바구니 불러오기
   useEffect(() => {
     axiosInstance
       .get("/me")
-      .then(() => {
-        // 로그인된 경우 장바구니 불러오기  ログインしているユーザーの場合、カートを取得
-        axiosInstance
-          .get("/user/cart")
-          .then((res) => setCartItems(res.data))
-          .catch((err) => {
-            console.error("カートの読み込みに失敗しました", err);
-          });
-      })
+      .then(() => fetchCartItems())
       .catch(() => {
         alert("ログインしてください");
         navigate("/login");
       });
   }, [navigate]);
 
-  //  상품 상세 페이지 이동 商品の詳細ページに遷移
+  // 장바구니 불러오기 함수
+  const fetchCartItems = () => {
+    axiosInstance
+      .get("/user/cart")
+      .then((res) => {
+        const validItems = res.data.filter((item) => item.itemId != null);
+        setCartItems(validItems);
+      })
+      .catch((err) => {
+        console.error("カートの読み込みに失敗しました", err);
+      });
+  };
+
+  // 상세 페이지 이동
   const goToDetail = (itemId) => {
     navigate(`/items/${itemId}`);
   };
 
-  //  장바구니 아이템 삭제  カートから商品を削除
+  // 장바구니 아이템 삭제
   const deleteItem = (cartItemId) => {
     axiosInstance
       .delete(`/user/cart/${cartItemId}`)
@@ -45,7 +51,7 @@ export default function CartPage() {
       });
   };
 
-  //Change Amount of Item   商品の数量変更
+  // 수량 변경
   const updateQuantity = (cartItemId, newQty) => {
     axiosInstance
       .patch(`/user/cart/${cartItemId}?quantity=${newQty}`)
@@ -64,10 +70,22 @@ export default function CartPage() {
       });
   };
 
+  // 총 가격 계산
   const totalPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
+
+  // 주문 처리
+  const handleOrder = () => {
+    if (cartItems.length === 0) {
+      alert("注文する商品がありません");
+      return;
+    }
+
+    const cartItemIds = cartItems.map((item) => item.cartItemId);
+    navigate("/mypage/orderpage", { state: { cartItemIds } }); // 주문 페이지로 이동하며 데이터 전달
+  };
 
   return (
     <Container className="mt-4">
@@ -124,12 +142,33 @@ export default function CartPage() {
           </Col>
         ))}
       </Row>
+
+      {/* 총 가격 + 주문 버튼 */}
       <div className="text-end mt-3">
         <h5>
           Total:{" "}
           <span className="text-primary">{totalPrice.toLocaleString()} 円</span>
         </h5>
+        <Button variant="success" className="mt-2" onClick={handleOrder}>
+          注文する
+        </Button>
       </div>
+
+      {/* 주문 완료 모달 */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>🎉 注文完了</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>ご注文ありがとうございます！</Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="primary"
+            onClick={() => navigate("/mypage/orderpage")}
+          >
+            注文履歴へ
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }

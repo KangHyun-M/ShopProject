@@ -1,21 +1,20 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "../css/SideBar.css";
+import "../css/UserInfoSidebar.css";
 
-export default function SideBar() {
+export default function UserInfoSidebar() {
   const [hovered, setHovered] = useState(null);
 
   const menu = [
     {
-      title: "会員管理",
-      submenu: [{ name: "会員リスト", path: "/admin/users" }],
+      title: "내 정보",
+      submenu: [{ name: "내 정보 보기", path: "/mypage/info" }],
     },
     {
-      title: "商品管理",
+      title: "정보 변경",
       submenu: [
-        { name: "商品リスト", path: "/admin/items" },
-        { name: "商品登録", path: "/admin/itemregistration" },
-        { name: "商品復旧", path: "/admin/items/deleted" },
+        { name: "주소 추가", path: "/mypage/newaddress" },
+        { name: "주소 목록", path: "/mypage/addresslist" },
       ],
     },
   ];

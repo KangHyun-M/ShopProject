@@ -19,4 +19,7 @@ public class UserDTO {
     private String usernic;     //닉네임                ニックネーム
     private String role;        //권한                  権限
 
+    private String address;
+    private String zipcode;
+
 }

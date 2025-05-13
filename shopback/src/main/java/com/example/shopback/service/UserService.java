@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.shopback.component.Role;
 import com.example.shopback.dto.UserDTO;
+import com.example.shopback.entity.Address;
 import com.example.shopback.entity.User;
 import com.example.shopback.repository.UserRepository;
 
@@ -65,21 +66,18 @@ public class UserService {
 
     //이메일로 사용자 조회      メールアドレスからユーザーを照会する
     public UserDTO findByUsername(String username){
-       Optional<User> optionalUser = userRepository.findByUsername(username);
-       
-       //값이 존재하는지 확인후, 존재하면 DTO로 변환하여 반환  値の存否確認後、存在する場合、DTOに変換して返還する
-       if(optionalUser.isPresent()){
-        User user = optionalUser.get();
-        return toDTO(user);
-       } else{
-        //값이 없을경우     値がない場合
-        return null;
-       }
+       Optional<User> optionalUser = userRepository.findWithAddressByUsername(username); //EntityGraph 사용
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            return toDTO(user);
+        } else {
+            return null;
+        }
     }
 
     //사용자 인증       ユーザー認証
     public boolean authenticate(String username, String password){
-        Optional<User> optionalUser = userRepository.findByUsername(username);
+        Optional<User> optionalUser = userRepository.findWithAddressByUsername(username);
 
         //값이 존재하는지 확인      値の存否確認
         if(!optionalUser.isPresent()){
@@ -111,10 +109,27 @@ public class UserService {
 
     //EntityをDToに変換
     private UserDTO toDTO(User user) {
+        String address = null;
+        String zipcode = null;
+
+        if (user.getAddress() != null && !user.getAddress().isEmpty()) {
+            Address main = user.getAddress().stream()
+                        .filter(addr -> Boolean.TRUE.equals(addr.getIsMain()))
+                        .findFirst()
+                        .orElse(null);
+
+            if(main != null){
+                address = main.getAddress();
+                zipcode = main.getZipcode();
+            }
+        }
+
         return UserDTO.builder()
                 .username(user.getUsername())
                 .usernic(user.getUsernic())
                 .role(user.getRole().name())
+                .address(address)
+                .zipcode(zipcode)
                 .build();
     }
     

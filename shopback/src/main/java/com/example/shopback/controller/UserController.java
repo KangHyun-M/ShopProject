@@ -123,9 +123,9 @@ public class UserController {
     public ResponseEntity<UserDTO> getCurrentUser(Authentication authentication) {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
-            UserDTO userDto = userService.findByUsername(username);
-            if (userDto != null) {
-                return ResponseEntity.ok(userDto);
+            UserDTO userDTO = userService.findByUsername(username);
+            if (userDTO != null) {
+                return ResponseEntity.ok(userDTO);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
             }
