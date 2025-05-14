@@ -1,46 +1,58 @@
-import React, { useState } from "react";
+import React from "react";
+import { Accordion, Nav } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import "../css/SideBar.css";
 
 export default function SideBar() {
-  const [hovered, setHovered] = useState(null);
-
-  const menu = [
-    {
-      title: "会員管理",
-      submenu: [{ name: "会員リスト", path: "/admin/users" }],
-    },
-    {
-      title: "商品管理",
-      submenu: [
-        { name: "商品リスト", path: "/admin/items" },
-        { name: "商品登録", path: "/admin/itemregistration" },
-        { name: "商品復旧", path: "/admin/items/deleted" },
-      ],
-    },
-  ];
-
   return (
-    <div className="sidebar">
-      {menu.map((m, idx) => (
-        <div
-          className="menu"
-          key={idx}
-          onMouseEnter={() => setHovered(idx)}
-          onMouseLeave={() => setHovered(null)}
-        >
-          <div className="menu-title">{m.title}</div>
-          {hovered === idx && (
-            <div className="submenu">
-              {m.submenu.map((sub, i) => (
-                <Link to={sub.path} className="submenu-item" key={i}>
-                  {sub.name}
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      ))}
+    <div
+      className="bg-light border-end"
+      style={{
+        width: "250px",
+        minHeight: "100vh",
+        padding: "20px",
+      }}
+    >
+      <h5 className="mb-4 fw-bold">管理メニュー</h5>
+
+      <Accordion alwaysOpen flush>
+        {/* 会員管理 */}
+        <Accordion.Item eventKey="0">
+          <Accordion.Header>会員管理</Accordion.Header>
+          <Accordion.Body className="p-0">
+            <Nav className="flex-column">
+              <Nav.Link as={Link} to="/admin/users" className="ps-4 py-2">
+                会員リスト
+              </Nav.Link>
+            </Nav>
+          </Accordion.Body>
+        </Accordion.Item>
+
+        {/* 商品管理 */}
+        <Accordion.Item eventKey="1">
+          <Accordion.Header>商品管理</Accordion.Header>
+          <Accordion.Body className="p-0">
+            <Nav className="flex-column">
+              <Nav.Link as={Link} to="/admin/items" className="ps-4 py-2">
+                商品リスト
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/admin/itemregistration"
+                className="ps-4 py-2"
+              >
+                商品登録
+              </Nav.Link>
+              <Nav.Link
+                as={Link}
+                to="/admin/items/deleted"
+                className="ps-4 py-2"
+              >
+                商品復旧
+              </Nav.Link>
+            </Nav>
+          </Accordion.Body>
+        </Accordion.Item>
+      </Accordion>
     </div>
   );
 }

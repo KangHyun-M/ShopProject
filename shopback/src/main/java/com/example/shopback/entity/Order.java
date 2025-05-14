@@ -51,6 +51,10 @@ public class Order {
     @JoinColumn(name = "orderAddr_id")
     private OrderAddress orderAddress;
 
+    @Builder.Default
+    @Column(name = "order_cancel",nullable = false)
+    private boolean cancle = false;
+
     public void addOrderItem(OrderItem orderItem){
         orderItems.add(orderItem);
         orderItem.setOrder(this);

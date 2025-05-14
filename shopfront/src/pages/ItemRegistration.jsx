@@ -1,7 +1,18 @@
+// src/pages/ItemRegistration.jsx
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { categories } from "../component/categories";
+import {
+  Container,
+  Form,
+  Button,
+  Card,
+  Row,
+  Col,
+  Image,
+} from "react-bootstrap";
+import Swal from "sweetalert2";
 
 export default function ItemRegistration() {
   const navigate = useNavigate();
@@ -11,7 +22,6 @@ export default function ItemRegistration() {
     price: 0,
     category: "",
   });
-
   const [images, setImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
@@ -21,12 +31,12 @@ export default function ItemRegistration() {
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          alert("管理者しかアクセスできません");
+          Swal.fire("アクセス拒否", "管理者しかアクセスできません", "warning");
           navigate("/");
         }
       })
       .catch(() => {
-        alert("ログインしてください");
+        Swal.fire("ログインエラー", "ログインしてください", "error");
         navigate("/login");
       });
   }, [navigate]);
@@ -67,103 +77,113 @@ export default function ItemRegistration() {
       await axiosInstance.post("/admin/registration", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("商品登録成功");
-      navigate("/admin/items");
+      Swal.fire("成功", "商品登録が完了しました", "success").then(() =>
+        navigate("/admin/items")
+      );
     } catch (err) {
       console.error(err);
-      alert("商品登録失敗");
+      Swal.fire("エラー", "商品登録に失敗しました", "error");
     }
   };
 
   return (
-    <div style={{ maxWidth: "700px", margin: "0 auto", padding: "20px" }}>
-      <h2>商品登録</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>商品名</label>
-          <input
-            name="itemname"
-            value={form.itemname}
-            onChange={handleChange}
-            required
-          />
-        </div>
+    <Container style={{ maxWidth: "700px" }} className="py-4">
+      <Card className="p-4 shadow-sm">
+        <h3 className="mb-4 text-center">商品登録</h3>
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>商品名</Form.Label>
+            <Form.Control
+              name="itemname"
+              value={form.itemname}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
 
-        <div>
-          <label>説明</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <Form.Group className="mb-3">
+            <Form.Label>説明</Form.Label>
+            <Form.Control
+              as="textarea"
+              name="description"
+              rows={3}
+              value={form.description}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
 
-        <div>
-          <label>価格</label>
-          <input
-            name="price"
-            type="number"
-            value={form.price}
-            onChange={handleChange}
-            required
-          />
-        </div>
+          <Form.Group className="mb-3">
+            <Form.Label>価格</Form.Label>
+            <Form.Control
+              type="number"
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
 
-        <div>
-          <label>カテゴリー</label>
-          <select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-            required
-          >
-            <option value="">選択</option>
-            {categories.map((cat, idx) => (
-              <option key={idx} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </select>
-        </div>
+          <Form.Group className="mb-3">
+            <Form.Label>カテゴリー</Form.Label>
+            <Form.Select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              required
+            >
+              <option value="">選択</option>
+              {categories.map((cat, idx) => (
+                <option key={idx} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
 
-        <div>
-          <label>イメージアップロード</label>
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-          />
-        </div>
+          <Form.Group className="mb-3">
+            <Form.Label>イメージアップロード</Form.Label>
+            <Form.Control
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+            />
+          </Form.Group>
 
-        {previewImages.length > 0 && (
-          <div>
-            <p>サムネイル選択:</p>
-            {previewImages.map((img, index) => (
-              <div key={index} style={{ marginBottom: "10px" }}>
-                <img
-                  src={img.url}
-                  alt={`preview-${index}`}
-                  style={{ height: "100px" }}
-                />
-                <label style={{ marginLeft: "10px" }}>
-                  <input
-                    type="radio"
-                    name="mainImage"
-                    value={index}
-                    checked={mainImageIndex === index}
-                    onChange={() => setMainImageIndex(index)}
-                  />{" "}
-                  サムネイル
-                </label>
-              </div>
-            ))}
+          {previewImages.length > 0 && (
+            <div className="mb-3">
+              <Form.Label>サムネイル選択</Form.Label>
+              <Row>
+                {previewImages.map((img, index) => (
+                  <Col xs={6} md={4} key={index} className="mb-3 text-center">
+                    <Image
+                      src={img.url}
+                      alt={`preview-${index}`}
+                      thumbnail
+                      style={{ height: "100px", objectFit: "contain" }}
+                    />
+                    <Form.Check
+                      type="radio"
+                      name="mainImage"
+                      label="サムネイル"
+                      checked={mainImageIndex === index}
+                      onChange={() => setMainImageIndex(index)}
+                      className="mt-2"
+                    />
+                  </Col>
+                ))}
+              </Row>
+            </div>
+          )}
+
+          <div className="text-center">
+            <Button type="submit" variant="primary">
+              登録
+            </Button>
           </div>
-        )}
-
-        <button type="submit">登録</button>
-      </form>
-    </div>
+        </Form>
+      </Card>
+    </Container>
   );
 }

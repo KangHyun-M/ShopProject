@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
-import { Container, Form, Row, Col, Button } from "react-bootstrap";
+import { Container, Form, Row, Col, Button, Spinner } from "react-bootstrap";
+import Swal from "sweetalert2";
 import AddressModal from "./AddressModal"; // 👈 모달 컴포넌트
 
 export default function Address() {
@@ -12,6 +13,7 @@ export default function Address() {
   const [banji, setBanji] = useState(""); // 番地
   const [detail, setDetail] = useState(""); // 건물명 등
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const navigate = useNavigate();
 
@@ -22,12 +24,17 @@ export default function Address() {
       .then((res) => {
         const role = res.data.role;
         if (role !== "USER" && role !== "ADMIN") {
-          alert("管理者及びユーザーだけ接近可能です");
+          Swal.fire(
+            "アクセス拒否",
+            "管理者及びユーザーだけ接近可能です",
+            "warning"
+          );
           navigate("/");
         }
+        setLoading(false);
       })
       .catch(() => {
-        alert("ログインしてください");
+        Swal.fire("ログインエラー", "ログインしてください", "error");
         navigate("/login");
       });
   }, [navigate]);
@@ -40,12 +47,21 @@ export default function Address() {
         zipcode,
         address: fullAddress,
       });
-      alert("住所が保存されました");
+      Swal.fire("成功", "住所が保存されました", "success");
+      navigate("/mypage/addresslist");
     } catch (err) {
       console.error("住所の保存に失敗:", err);
-      alert("住所の保存に失敗しました");
+      Swal.fire("エラー", "住所の保存に失敗しました", "error");
     }
   };
+
+  if (loading) {
+    return (
+      <div className="d-flex justify-content-center mt-5">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
+  }
 
   return (
     <Container className="py-4" style={{ maxWidth: "600px" }}>
@@ -110,19 +126,22 @@ export default function Address() {
         />
       </Form.Group>
 
-      <Button variant="primary" onClick={handleSave}>
-        保存
-      </Button>
+      <div className="text-end">
+        <Button variant="primary" onClick={handleSave}>
+          保存
+        </Button>
+      </div>
 
       {/* 주소 검색 모달 */}
       <AddressModal
         show={showModal}
+        initialZipcode={zipcode}
         onClose={() => setShowModal(false)}
         onSelect={(result) => {
           setZipcode(result.zipcode);
-          setAddress1(result.address1); // 都道府県
-          setAddress2(result.address2); // 市区町村
-          setAddress3(result.address3); // 町名
+          setAddress1(result.address1);
+          setAddress2(result.address2);
+          setAddress3(result.address3);
           setShowModal(false);
         }}
       />

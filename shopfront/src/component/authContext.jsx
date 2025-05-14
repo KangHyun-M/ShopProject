@@ -16,40 +16,30 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   const fetchUser = useCallback(async () => {
-    if (!isLoggedIn) return;
     try {
       const res = await axiosInstance.get("/me");
       if (res.data) {
         setUser(res.data);
       } else {
         setUser(null);
-        console.warn("ユーザー情報を取得できません");
       }
     } catch (err) {
       console.error("ユーザー情報の取得失敗", err);
       setUser(null);
-      console.warn(
-        "ログイン状態を確認できません。もう一度ログインしてください。"
-      );
     }
-  }, [isLoggedIn]);
+  }, []);
 
   const login = async (username, password, from = "/") => {
     try {
       const res = await axiosInstance.post("/login", { username, password });
-      console.log("authContext ログインリクエストのレスポンス :", res);
       if (res.status === 200) {
         setIsLoggedIn(true);
         localStorage.setItem("token", "true");
         await fetchUser();
         alert("ログイン成功!");
-        console.log("ログイン試行 - メールアドレス:", username);
-
-        // 이전 페이지로 이동 以前のページに遷移
         navigate(from, { replace: true });
       } else {
         alert("ログイン失敗!");
-        console.error("ログイン失敗 - サーバー応答:", res);
       }
     } catch (err) {
       console.error("ログイン要求失敗", err);
@@ -67,7 +57,6 @@ export const AuthProvider = ({ children }) => {
         alert("ログアウトしました");
         navigate("/");
       } else {
-        console.error("ログアウト失敗 - サーバーエラー", res);
         alert("ログアウト失敗");
       }
     } catch (err) {
@@ -96,20 +85,18 @@ export const AuthProvider = ({ children }) => {
         console.error("セッション確認失敗", err);
         setIsLoggedIn(false);
         setUser(null);
-        console.warn("ログイン状態を確認できません");
       }
     };
 
     checkSession();
   }, []);
 
+  //중복 방지를 위한 user === null 조건 추가
   useEffect(() => {
-    if (isLoggedIn) {
+    if (isLoggedIn && user === null) {
       fetchUser();
-    } else {
-      setUser(null);
     }
-  }, [isLoggedIn, fetchUser]);
+  }, [isLoggedIn, user, fetchUser]);
 
   return (
     <AuthContext.Provider value={{ isLoggedIn, user, login, logout }}>

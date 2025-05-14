@@ -3,6 +3,7 @@ package com.example.shopback.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -11,6 +12,8 @@ import com.example.shopback.dto.OrderDTO;
 import com.example.shopback.dto.OrderItemDTO;
 import com.example.shopback.dto.OrderRequestDTO;
 import com.example.shopback.entity.CartItem;
+import com.example.shopback.entity.Item;
+import com.example.shopback.entity.ItemImg;
 import com.example.shopback.entity.Order;
 import com.example.shopback.entity.OrderAddress;
 import com.example.shopback.entity.OrderItem;
@@ -31,16 +34,17 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     @Transactional
-    public void placeOrder(String username, OrderRequestDTO request){
+    public void placeOrder(String username, OrderRequestDTO request) {
         User user = userRepository.findWithAddressByUsername(username)
                 .orElseThrow(() -> new RuntimeException("ユーザーが存在しません"));
 
         List<OrderItem> orderItems = new ArrayList<>();
-        for(Long cartItemId : request.getCartItemIds()){
+
+        for (Long cartItemId : request.getCartItemIds()) {
             CartItem cartItem = cartRepository.findById(cartItemId)
                     .orElseThrow(() -> new RuntimeException("カート商品が見つかりません"));
 
-            if(!cartItem.getUser().equals(user)){
+            if (!cartItem.getUser().equals(user)) {
                 throw new RuntimeException("他人のカートです");
             }
 
@@ -51,6 +55,8 @@ public class OrderService {
                     .build();
 
             orderItems.add(orderItem);
+
+            // 카트 아이템 soft delete 처리
             cartItem.setDeleted(true);
             cartItem.setModifiedAt(LocalDateTime.now());
         }
@@ -61,6 +67,7 @@ public class OrderService {
                 .address(request.getAddress())
                 .build();
 
+        // 주문 생성
         Order order = Order.builder()
                 .user(user)
                 .orderItems(orderItems)
@@ -68,7 +75,13 @@ public class OrderService {
                 .orderAddress(orderAddress)
                 .build();
 
+        //양방향 연관관계 설정
+        orderAddress.setOrder(order);
+
+        // 주문 아이템에도 order 설정
         order.getOrderItems().forEach(item -> item.setOrder(order));
+
+        // 저장
         orderRepository.save(order);
     }
 
@@ -79,28 +92,43 @@ public class OrderService {
 
         return user.getOrders().stream()
                 .map(order -> {
-                    OrderAddress orderAddress = order.getOrderAddress();
+                        OrderAddress orderAddress = order.getOrderAddress();
+                        String zip = orderAddress != null ? orderAddress.getZipcode() : "";
+                        String addr = orderAddress != null ? orderAddress.getAddress() : "";
 
-                    String zip = orderAddress != null ? orderAddress.getZipcode() : "";
-                    String addr = orderAddress != null ? orderAddress.getAddress() : "";
+                        List<OrderItemDTO> items = order.getOrderItems().stream()
+                                .map(oi -> {
+                                Item item = oi.getItem();
+                                Optional<ItemImg> mainImg = item.getItemImgs().stream()
+                                        .filter(ItemImg::getMainImg)
+                                        .findFirst();
 
-                    List<OrderItemDTO> items = order.getOrderItems().stream()
-                            .map(oi -> OrderItemDTO.builder()
-                                    .itemName(oi.getItem().getItemname())
-                                    .price(oi.getPrice())
-                                    .quantity(oi.getQuantity())
-                                    .build())
-                            .collect(Collectors.toList());
+                                return OrderItemDTO.builder()
+                                        .itemName(item.getItemname())
+                                        .price(oi.getPrice())
+                                        .quantity(oi.getQuantity())
+                                        .imgPath(mainImg.map(ItemImg::getImgPath).orElse(null))
+                                        .itemId(item.getId())
+                                        .build();
+                                })
+                                .collect(Collectors.toList());
 
-                    return OrderDTO.builder()
-                            .orderId(order.getId())
-                            .orderAt(order.getOrderAt())
-                            .deliveryZip(zip)
-                            .deliveryAddr(addr)
-                            .items(items)
-                            .build();
+                        return OrderDTO.builder()
+                                .orderId(order.getId())
+                                .orderAt(order.getOrderAt())
+                                .deliveryZip(zip)
+                                .deliveryAddr(addr)
+                                .items(items)
+                                .build();
                 })
                 .collect(Collectors.toList());
-    }
+        }
+    
+     @Transactional
+     public void cancelOrder(Long orderId){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("注文が見つかりません"));
 
+        orderRepository.delete(order);
+     }
 }

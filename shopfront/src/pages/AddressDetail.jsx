@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import {
+  Button,
+  Card,
+  Col,
+  Container,
+  Form,
+  Row,
+  Spinner,
+} from "react-bootstrap";
+import { useNavigate, useParams } from "react-router-dom";
+import Swal from "sweetalert2";
 import axiosInstance from "../component/axiosInstance";
-import { Container, Form, Row, Col, Button, Spinner } from "react-bootstrap";
-import UserInfoSidebar from "../component/UserInfoSidebar";
 import AddressModal from "./AddressModal";
 
 export default function AddressDetail() {
@@ -10,11 +18,11 @@ export default function AddressDetail() {
   const navigate = useNavigate();
 
   const [zipcode, setZipcode] = useState("");
-  const [address1, setAddress1] = useState(""); // 都道府県
-  const [address2, setAddress2] = useState(""); // 市区町村
-  const [address3, setAddress3] = useState(""); // 町名
-  const [banji, setBanji] = useState(""); // 番地
-  const [detail, setDetail] = useState(""); // 건물명 등
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [address3, setAddress3] = useState("");
+  const [banji, setBanji] = useState("");
+  const [detail, setDetail] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -25,7 +33,6 @@ export default function AddressDetail() {
         const fullAddress = res.data.address;
         setZipcode(res.data.zipcode);
 
-        // 주소 파싱 (예: 北海道札幌市中央区5丁目7番地○○ビル101号室)
         const parsed1 = fullAddress.slice(0, 3);
         const parsed2 = fullAddress.slice(3, 6);
         const rest = fullAddress.slice(6);
@@ -46,8 +53,8 @@ export default function AddressDetail() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error("주소 정보 불러오기 실패", err);
-        alert("주소 정보를 불러올 수 없습니다");
+        console.error("住所情報取得失敗", err);
+        Swal.fire("エラー", "住所情報を取得できません", "error");
         navigate("/mypage/addresslist");
       });
   }, [id, navigate]);
@@ -59,88 +66,89 @@ export default function AddressDetail() {
         zipcode,
         address: fullAddress,
       });
-      alert("주소가 수정되었습니다");
+      Swal.fire("成功", "住所が更新されました", "success");
       navigate("/mypage/addresslist");
     } catch (err) {
-      console.error("주소 수정 실패", err);
-      alert("수정에 실패했습니다");
+      console.error("住所更新失敗", err);
+      Swal.fire("エラー", "住所の更新に失敗しました", "error");
     }
   };
 
   if (loading) {
     return (
       <div className="d-flex justify-content-center mt-5">
-        <Spinner animation="border" />
+        <Spinner animation="border" variant="primary" />
       </div>
     );
   }
 
   return (
-    <Container className="py-4" style={{ maxWidth: "600px" }}>
+    <Container fluid className="py-4">
       <Row>
-        <Col md={3}>
-          <UserInfoSidebar />
-        </Col>
         <Col md={9}>
-          <h3 className="mb-4">주소 수정</h3>
+          <Card className="p-4 shadow-sm">
+            <h4 className="mb-4">住所修正</h4>
 
-          <Form.Group className="mb-3">
-            <Form.Label>郵便番号</Form.Label>
-            <Row>
-              <Col xs={8}>
-                <Form.Control
-                  type="text"
-                  placeholder="例: 0600062"
-                  value={zipcode}
-                  onChange={(e) => setZipcode(e.target.value)}
-                />
-              </Col>
-              <Col>
-                <Button onClick={() => setShowModal(true)}>住所検索</Button>
-              </Col>
-            </Row>
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>郵便番号</Form.Label>
+              <Row>
+                <Col xs={8}>
+                  <Form.Control
+                    type="text"
+                    placeholder="例: 0600062"
+                    value={zipcode}
+                    onChange={(e) => setZipcode(e.target.value)}
+                  />
+                </Col>
+                <Col>
+                  <Button onClick={() => setShowModal(true)}>住所検索</Button>
+                </Col>
+              </Row>
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>都道府県</Form.Label>
-            <Form.Control type="text" value={address1} readOnly />
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>都道府県</Form.Label>
+              <Form.Control type="text" value={address1} readOnly />
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>市区町村</Form.Label>
-            <Form.Control type="text" value={address2} readOnly />
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>市区町村</Form.Label>
+              <Form.Control type="text" value={address2} readOnly />
+            </Form.Group>
 
-          <Form.Group className="mb-3">
-            <Form.Label>町名・番地</Form.Label>
-            <Row>
-              <Col sm={6}>
-                <Form.Control type="text" value={address3} readOnly />
-              </Col>
-              <Col sm={6}>
-                <Form.Control
-                  type="text"
-                  placeholder="番地を入力"
-                  value={banji}
-                  onChange={(e) => setBanji(e.target.value)}
-                />
-              </Col>
-            </Row>
-          </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>町名・番地</Form.Label>
+              <Row>
+                <Col sm={6}>
+                  <Form.Control type="text" value={address3} readOnly />
+                </Col>
+                <Col sm={6}>
+                  <Form.Control
+                    type="text"
+                    placeholder="番地を入力"
+                    value={banji}
+                    onChange={(e) => setBanji(e.target.value)}
+                  />
+                </Col>
+              </Row>
+            </Form.Group>
 
-          <Form.Group className="mb-4">
-            <Form.Label>建物名・部屋番号など</Form.Label>
-            <Form.Control
-              type="text"
-              placeholder="例: ○○ビル101号室"
-              value={detail}
-              onChange={(e) => setDetail(e.target.value)}
-            />
-          </Form.Group>
+            <Form.Group className="mb-4">
+              <Form.Label>建物名・部屋番号など</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="例: ○○ビル101号室"
+                value={detail}
+                onChange={(e) => setDetail(e.target.value)}
+              />
+            </Form.Group>
 
-          <Button variant="primary" onClick={handleUpdate}>
-            保存
-          </Button>
+            <div className="text-end">
+              <Button variant="primary" onClick={handleUpdate}>
+                保存
+              </Button>
+            </div>
+          </Card>
 
           <AddressModal
             show={showModal}
@@ -152,6 +160,7 @@ export default function AddressDetail() {
               setAddress3(result.address3);
               setShowModal(false);
             }}
+            initialZipcode={zipcode}
           />
         </Col>
       </Row>

@@ -1,5 +1,7 @@
 package com.example.shopback.dto;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,10 +12,9 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class OrderItemDTO {
-    private String itemName;
-    private int quantity;
-    private int price;
-    private String imgPath;
-    private Long itemId;
+public class UserRequestDTO {
+    private Long id;
+    private String username;
+    private String usernic;
+    private List<OrderDTO> orders;
 }

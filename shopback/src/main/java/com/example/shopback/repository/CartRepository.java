@@ -17,4 +17,7 @@ public interface CartRepository extends JpaRepository<CartItem, Long>{
 
     @Query("SELECT c FROM CartItem c JOIN FETCH c.item i WHERE c.user.id = :userId AND c.deleted = false AND i.deleted = false")
     List<CartItem> fetchActiveCartItemsWithValidItem(@Param("userId") Long userId);
+
+    @Query("SELECT c FROM CartItem c JOIN FETCH c.item i LEFT JOIN FETCH i.itemImgs WHERE c.id IN :ids AND c.user.id = :userId")
+    List<CartItem> findByIdInAndUserId(@Param("ids") List<Long> ids, @Param("userId") Long userId);
 }

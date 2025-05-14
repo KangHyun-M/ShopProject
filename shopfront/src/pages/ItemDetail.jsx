@@ -1,6 +1,8 @@
+// src/pages/ItemDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import axiosInstance from "../component/axiosInstance";
+import Swal from "sweetalert2";
 import {
   Container,
   Row,
@@ -10,6 +12,7 @@ import {
   Image,
   Spinner,
   Button,
+  Form,
 } from "react-bootstrap";
 
 export default function ItemDetail() {
@@ -35,14 +38,17 @@ export default function ItemDetail() {
         quantity: quantity,
       })
       .then(() => {
-        alert("カートに追加しました!");
+        Swal.fire("成功", "カートに追加しました!", "success");
       })
       .catch((err) => {
         if (err.response?.status === 403 || err.response?.status === 401) {
-          alert("ログインしてください");
-          navigate("/login", { state: { from: location } });
+          Swal.fire("ログインエラー", "ログインしてください", "warning").then(
+            () => {
+              navigate("/login", { state: { from: location } });
+            }
+          );
         } else {
-          alert("カートに追加失敗");
+          Swal.fire("エラー", "カートに追加失敗", "error");
           console.error(err);
         }
       });
@@ -60,8 +66,7 @@ export default function ItemDetail() {
     <Container className="mt-4">
       <Card className="p-4 shadow-sm border-0">
         <Row>
-          {/* 左側：イメージ */}
-          <Col md={6}>
+          <Col md={6} className="mb-3 mb-md-0">
             {item.imagePaths?.length > 0 ? (
               <Carousel variant="dark" interval={null}>
                 {item.imagePaths.map((path, idx) => (
@@ -93,38 +98,41 @@ export default function ItemDetail() {
             )}
           </Col>
 
-          {/* 右側: 商品情報 */}
           <Col md={6}>
             <h2 className="fw-bold mb-3">{item.itemname}</h2>
             <p className="text-muted">カテゴリー: {item.category}</p>
-            <p className="mb-4">{item.description}</p>
 
-            <div className="d-flex align-items-center mb-3">
-              <label className="me-2 fw-semibold">数量:</label>
-              <select
+            <Form.Group className="mb-3 d-flex align-items-center">
+              <Form.Label className="me-3 fw-semibold">数量</Form.Label>
+              <Form.Select
                 value={quantity}
                 onChange={(e) => setQuantity(Number(e.target.value))}
-                style={{ width: "80px" }}
+                style={{ width: "100px" }}
               >
                 {[...Array(10)].map((_, i) => (
                   <option key={i + 1} value={i + 1}>
                     {i + 1}
                   </option>
                 ))}
-              </select>
-            </div>
+              </Form.Select>
+            </Form.Group>
+
             <h4 className="text-primary fw-bold mb-3">
               {item.price.toLocaleString()} 円
             </h4>
 
-            <div className="d-flex gap-3">
-              <Button variant="primary" onClick={addToCart}>
+            <div className="text-start">
+              <Button variant="primary" onClick={addToCart} className="px-4">
                 カートに追加
               </Button>
-              <Button variant="success">購買</Button>
             </div>
           </Col>
         </Row>
+      </Card>
+
+      <Card className="p-4 mt-4 shadow-sm border-0">
+        <h4 className="fw-bold mb-3">📘 商品詳細</h4>
+        <p style={{ whiteSpace: "pre-line" }}>{item.description}</p>
       </Card>
     </Container>
   );

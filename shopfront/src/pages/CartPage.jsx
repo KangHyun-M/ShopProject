@@ -1,6 +1,8 @@
+// src/pages/CartPage.jsx
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import { Container, Row, Col, Card, Button, Modal } from "react-bootstrap";
 
 export default function CartPage() {
@@ -8,18 +10,16 @@ export default function CartPage() {
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
 
-  // 유저 확인 + 장바구니 불러오기
   useEffect(() => {
     axiosInstance
       .get("/me")
       .then(() => fetchCartItems())
       .catch(() => {
-        alert("ログインしてください");
+        Swal.fire("ログインエラー", "ログインしてください", "error");
         navigate("/login");
       });
   }, [navigate]);
 
-  // 장바구니 불러오기 함수
   const fetchCartItems = () => {
     axiosInstance
       .get("/user/cart")
@@ -32,26 +32,37 @@ export default function CartPage() {
       });
   };
 
-  // 상세 페이지 이동
   const goToDetail = (itemId) => {
     navigate(`/items/${itemId}`);
   };
 
-  // 장바구니 아이템 삭제
   const deleteItem = (cartItemId) => {
-    axiosInstance
-      .delete(`/user/cart/${cartItemId}`)
-      .then(() => {
-        setCartItems((prev) =>
-          prev.filter((item) => item.cartItemId !== cartItemId)
-        );
-      })
-      .catch((err) => {
-        console.error("削除失敗", err);
-      });
+    Swal.fire({
+      title: "削除確認",
+      text: "この商品をカートから削除しますか？",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#6c757d",
+      confirmButtonText: "削除",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        axiosInstance
+          .delete(`/user/cart/${cartItemId}`)
+          .then(() => {
+            setCartItems((prev) =>
+              prev.filter((item) => item.cartItemId !== cartItemId)
+            );
+            Swal.fire("削除完了", "商品が削除されました", "success");
+          })
+          .catch((err) => {
+            console.error("削除失敗", err);
+            Swal.fire("エラー", "削除に失敗しました", "error");
+          });
+      }
+    });
   };
 
-  // 수량 변경
   const updateQuantity = (cartItemId, newQty) => {
     axiosInstance
       .patch(`/user/cart/${cartItemId}?quantity=${newQty}`)
@@ -65,33 +76,33 @@ export default function CartPage() {
         );
       })
       .catch((err) => {
-        alert("数量変更失敗");
+        Swal.fire("エラー", "数量変更に失敗しました", "error");
         console.error(err);
       });
   };
 
-  // 총 가격 계산
   const totalPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
 
-  // 주문 처리
   const handleOrder = () => {
     if (cartItems.length === 0) {
-      alert("注文する商品がありません");
+      Swal.fire("注文不可", "注文する商品がありません", "info");
       return;
     }
 
     const cartItemIds = cartItems.map((item) => item.cartItemId);
-    navigate("/mypage/orderpage", { state: { cartItemIds } }); // 주문 페이지로 이동하며 데이터 전달
+    navigate("/mypage/orderpage", { state: { cartItemIds } });
   };
 
   return (
     <Container className="mt-4">
-      <h3>🛒 カート</h3>
+      <h3 className="mb-4">🛒 カート</h3>
       <Row>
-        {cartItems.length === 0 && <p>カートが空いてます</p>}
+        {cartItems.length === 0 && (
+          <p className="text-muted">カートが空いてます</p>
+        )}
         {cartItems.map((item) => (
           <Col md={4} key={item.cartItemId} className="mb-4">
             <Card className="h-100 shadow-sm border-0">
@@ -114,9 +125,11 @@ export default function CartPage() {
               <Card.Body>
                 <Card.Title>{item.itemName}</Card.Title>
                 <Card.Text>{item.description}</Card.Text>
-                <Card.Text>価格: {item.price.toLocaleString()}円</Card.Text>
+                <Card.Text className="fw-bold text-primary">
+                  価格: {item.price.toLocaleString()}円
+                </Card.Text>
                 <Card.Text>
-                  数量:{" "}
+                  数量:
                   <select
                     value={item.quantity}
                     onChange={(e) =>
@@ -131,40 +144,40 @@ export default function CartPage() {
                     ))}
                   </select>
                 </Card.Text>
-                <Button
-                  variant="danger"
-                  onClick={() => deleteItem(item.cartItemId)}
-                >
-                  削除
-                </Button>
+                <div className="text-end">
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => deleteItem(item.cartItemId)}
+                  >
+                    削除
+                  </Button>
+                </div>
               </Card.Body>
             </Card>
           </Col>
         ))}
       </Row>
 
-      {/* 총 가격 + 주문 버튼 */}
-      <div className="text-end mt-3">
+      <div className="text-end mt-4">
         <h5>
-          Total:{" "}
-          <span className="text-primary">{totalPrice.toLocaleString()} 円</span>
+          Total:
+          <span className="text-success fw-bold">
+            {totalPrice.toLocaleString()} 円
+          </span>
         </h5>
-        <Button variant="success" className="mt-2" onClick={handleOrder}>
+        <Button variant="success" className="mt-2 px-4" onClick={handleOrder}>
           注文する
         </Button>
       </div>
 
-      {/* 주문 완료 모달 */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>🎉 注文完了</Modal.Title>
         </Modal.Header>
         <Modal.Body>ご注文ありがとうございます！</Modal.Body>
         <Modal.Footer>
-          <Button
-            variant="primary"
-            onClick={() => navigate("/mypage/orderpage")}
-          >
+          <Button variant="primary" onClick={() => navigate("/mypage/orders")}>
             注文履歴へ
           </Button>
         </Modal.Footer>

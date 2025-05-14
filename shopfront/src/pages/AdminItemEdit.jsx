@@ -3,13 +3,15 @@ import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../component/axiosInstance";
 import {
   Container,
-  Card,
   Form,
-  Button,
-  Image,
   Row,
   Col,
+  Button,
+  Card,
+  Image,
+  Spinner,
 } from "react-bootstrap";
+import Swal from "sweetalert2";
 import { categories } from "../component/categories";
 
 export default function AdminItemEdit() {
@@ -24,20 +26,19 @@ export default function AdminItemEdit() {
   });
   const [images, setImages] = useState([]);
   const [existingImages, setExistingImages] = useState([]);
-  const [mainImage, setMainImage] = useState(""); // サムネイルのパス
+  const [mainImage, setMainImage] = useState("");
 
   useEffect(() => {
-    // 관리자 체크 및 데이터 로드 アドミンチェック及びデータのロード
     axiosInstance
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          alert("管理者しかアクセスできません");
+          Swal.fire("アクセス拒否", "管理者しかアクセスできません", "warning");
           navigate("/");
         }
       })
       .catch(() => {
-        alert("ログインしてください");
+        Swal.fire("エラー", "ログインしてください", "error");
         navigate("/login");
       });
 
@@ -55,7 +56,7 @@ export default function AdminItemEdit() {
         setMainImage(res.data.mainImage || res.data.imagePaths?.[0] || "");
       })
       .catch(() => {
-        alert("該当する商品は存在しません");
+        Swal.fire("エラー", "該当する商品は存在しません", "error");
         navigate("/admin/items");
       });
   }, [id, navigate]);
@@ -71,10 +72,7 @@ export default function AdminItemEdit() {
 
   const handleImageDelete = (url) => {
     setExistingImages(existingImages.filter((img) => img !== url));
-    if (mainImage === url) {
-      setMainImage(""); // 대표 이미지로 지정되어 있던 이미지가 삭제될 경우 초기화
-      //サムネイルに登録されていたイメージが削除される場合、初期化
-    }
+    if (mainImage === url) setMainImage("");
   };
 
   const handleSubmit = async (e) => {
@@ -97,24 +95,29 @@ export default function AdminItemEdit() {
       await axiosInstance.put(`/admin/items/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("修正完了");
-      navigate("/admin/items");
+      Swal.fire("成功", "商品の修正が完了しました", "success").then(() => {
+        navigate("/admin/items");
+      });
     } catch (err) {
       console.error(err);
-      alert("修正失敗");
+      Swal.fire("エラー", "修正に失敗しました", "error");
     }
   };
 
-  if (!item) return <p className="text-center mt-5">Now Loading...</p>;
+  if (!item)
+    return (
+      <div className="d-flex justify-content-center mt-5">
+        <Spinner animation="border" variant="primary" />
+      </div>
+    );
 
   return (
-    <Container className="py-4" style={{ maxWidth: "700px" }}>
-      <h3 className="mb-4 text-center">商品情報修正</h3>
+    <Container className="py-4" style={{ maxWidth: "800px" }}>
+      <Card className="p-4 shadow-sm">
+        <h3 className="mb-4 text-center">商品情報修正</h3>
 
-      {/* サムネイル */}
-      <Card className="mb-4 p-3">
         <h5>既存の画像</h5>
-        <Row>
+        <Row className="mb-4">
           {existingImages.map((img, idx) => (
             <Col key={idx} xs={6} md={4} className="mb-3 text-center">
               <Image
@@ -143,73 +146,76 @@ export default function AdminItemEdit() {
             </Col>
           ))}
         </Row>
+
+        <Form onSubmit={handleSubmit}>
+          <Form.Group className="mb-3">
+            <Form.Label>商品名</Form.Label>
+            <Form.Control
+              type="text"
+              name="itemname"
+              value={form.itemname}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>説明</Form.Label>
+            <Form.Control
+              as="textarea"
+              name="description"
+              rows={3}
+              value={form.description}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>価格</Form.Label>
+            <Form.Control
+              type="number"
+              name="price"
+              value={form.price}
+              onChange={handleChange}
+              required
+            />
+          </Form.Group>
+
+          <Form.Group className="mb-3">
+            <Form.Label>カテゴリー</Form.Label>
+            <Form.Select
+              name="category"
+              value={form.category}
+              onChange={handleChange}
+              required
+            >
+              <option value="">選択</option>
+              {categories.map((cat, idx) => (
+                <option key={idx} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+
+          <Form.Group className="mb-4">
+            <Form.Label>追加イメージアップロード</Form.Label>
+            <Form.Control
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleImageChange}
+            />
+          </Form.Group>
+
+          <div className="text-end">
+            <Button type="submit" variant="primary">
+              修正完了
+            </Button>
+          </div>
+        </Form>
       </Card>
-
-      {/* 修正フォーム */}
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3">
-          <Form.Label>商品名</Form.Label>
-          <Form.Control
-            type="text"
-            name="itemname"
-            value={form.itemname}
-            onChange={handleChange}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>説明</Form.Label>
-          <Form.Control
-            as="textarea"
-            name="description"
-            rows={3}
-            value={form.description}
-            onChange={handleChange}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>価格</Form.Label>
-          <Form.Control
-            type="number"
-            name="price"
-            value={form.price}
-            onChange={handleChange}
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>カテゴリー</Form.Label>
-          <Form.Select
-            name="category"
-            value={form.category}
-            onChange={handleChange}
-          >
-            <option value="">選択</option>
-            {categories.map((cat, idx) => (
-              <option key={idx} value={cat}>
-                {cat}
-              </option>
-            ))}
-          </Form.Select>
-        </Form.Group>
-
-        <Form.Group className="mb-4">
-          <Form.Label>追加イメージアップロード</Form.Label>
-          <Form.Control
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageChange}
-          />
-        </Form.Group>
-
-        <div className="text-center">
-          <Button type="submit" variant="primary">
-            修正完了
-          </Button>
-        </div>
-      </Form>
     </Container>
   );
 }

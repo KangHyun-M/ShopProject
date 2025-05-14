@@ -1,22 +1,62 @@
-/* layout.css */
+/* 전체 높이 설정 */
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* 앱 전체 구조 */
 .app-layout {
   display: flex;
   flex-direction: column;
+  min-height: 100vh;
 }
 
+/* 네비게이션 바 - 상단 고정 */
 .navbar-fixed {
   position: fixed;
   top: 0;
   width: 100%;
   z-index: 1000;
+  height: 60px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.content-area {
-  margin-top: 60px; /* Navbar 높이 */
+/* 네비게이션 아래 전체 레이아웃 (사이드바 + 콘텐츠) */
+.main-layout {
+  display: flex;
+  flex-direction: row;
+  padding-top: 60px; /* 네비게이션 높이만큼 여백 줌 */
+}
+
+/* 사이드바 */
+.sidebar {
+  width: 200px;
+  min-height: calc(100vh - 60px); /* 네비게이션 높이 제외 */
+  background-color: #f8f9fa;
   padding: 20px;
-  transition: margin-left 0.3s;
+  border-right: 1px solid #dee2e6;
+
+  /* fixed 제거 → 콘텐츠 흐름에 따라 배치 */
+  position: relative;
+  top: 0;
+  left: 0;
 }
 
-.with-sidebar {
-  margin-left: 200px; /* Sidebar 너비만큼 오른쪽으로 밀기 */
+/* 콘텐츠 영역 */
+.content-area {
+  flex-grow: 1;
+  padding: 24px;
+  transition: margin-left 0.3s ease;
+  background-color: #fff;
 }
+
+/* 
+.with-sidebar {
+  margin-left: 200px;
+} 
+사이드바가 fixed일 경우에만 사용 
+*/

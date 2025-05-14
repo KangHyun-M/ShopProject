@@ -1,20 +1,33 @@
 package com.example.shopback.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.shopback.component.Role;
+import com.example.shopback.dto.OrderDTO;
+import com.example.shopback.dto.OrderItemDTO;
 import com.example.shopback.dto.UserDTO;
+import com.example.shopback.dto.UserRequestDTO;
 import com.example.shopback.entity.Address;
+import com.example.shopback.entity.Item;
+import com.example.shopback.entity.ItemImg;
+import com.example.shopback.entity.Order;
 import com.example.shopback.entity.User;
+import com.example.shopback.repository.OrderRepository;
 import com.example.shopback.repository.UserRepository;
 
 @Service
 public class UserService {
     
+
+    @Autowired
+    private OrderRepository orderRepository;
+
     @Autowired
     private UserRepository userRepository;
 
@@ -95,6 +108,65 @@ public class UserService {
 
         System.out.println("ログイン成功: " + username);
         return true;
+    }
+
+    public List<UserRequestDTO> getAllUsers(){
+        List<User> users = userRepository.findAll();
+        
+        return users.stream()
+                .map(user -> UserRequestDTO.builder()
+                        .id(user.getId())
+                        .username(user.getUsername())
+                        .usernic(user.getUsernic())
+                        .build())
+
+                .collect(Collectors.toList());
+                    
+    }
+
+    public UserRequestDTO getUserDetail(Long userId) {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
+
+        List<Order> orderList = orderRepository.findByUser_Username(user.getUsername());
+
+        List<OrderDTO> orders = orderList.stream()
+            .map(order -> {
+                String zip = order.getOrderAddress() != null ? order.getOrderAddress().getZipcode() : "";
+                String addr = order.getOrderAddress() != null ? order.getOrderAddress().getAddress() : "";
+
+                List<OrderItemDTO> items = order.getOrderItems().stream().map(oi -> {
+                    Item item = oi.getItem();
+                    String imgPath = item.getItemImgs().stream()
+                            .filter(ItemImg::getMainImg)
+                            .map(ItemImg::getImgPath)
+                            .findFirst()
+                            .orElse(null);
+
+                    return OrderItemDTO.builder()
+                            .itemName(item.getItemname())
+                            .itemId(item.getId())
+                            .imgPath(imgPath)
+                            .price(oi.getPrice())
+                            .quantity(oi.getQuantity())
+                            .build();
+                }).toList();
+
+                return OrderDTO.builder()
+                        .orderId(order.getId())
+                        .orderAt(order.getOrderAt())
+                        .deliveryZip(zip)
+                        .deliveryAddr(addr)
+                        .items(items)
+                        .build();
+            }).toList();
+
+        return UserRequestDTO.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .usernic(user.getUsernic())
+                .orders(orders) // ✅ 주문 정보 포함
+                .build();
     }
 
     // DTO를 Entity로 변환      DTOをEntityに変換

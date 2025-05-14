@@ -2,14 +2,12 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
-import UserInfoSidebar from "../component/UserInfoSidebar";
 
 export default function AddressList() {
   const [addressList, setAddressList] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // 로그인 및 권한 확인 + 주소 목록 조회
   useEffect(() => {
     axiosInstance
       .get("/me")
@@ -39,7 +37,6 @@ export default function AddressList() {
       .finally(() => setLoading(false));
   };
 
-  // 삭제 처리
   const handleDelete = async (id) => {
     if (!window.confirm("이 주소를 정말 삭제하시겠습니까?")) return;
 
@@ -53,7 +50,6 @@ export default function AddressList() {
     }
   };
 
-  // 대표 주소 설정
   const handleSetMain = async (id) => {
     try {
       await axiosInstance.patch(`/user/address/${id}/main`);
@@ -75,76 +71,68 @@ export default function AddressList() {
 
   return (
     <Container fluid className="py-4">
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h4>등록된 주소</h4>
+        <Button onClick={() => navigate("/mypage/newaddress")}>
+          새 주소 추가
+        </Button>
+      </div>
+
       <Row>
-        <Col md={3}>
-          <UserInfoSidebar />
-        </Col>
+        {addressList.length === 0 ? (
+          <p>등록된 주소가 없습니다.</p>
+        ) : (
+          addressList.map((addr) => (
+            <Col md={6} lg={4} key={addr.id} className="mb-4">
+              <Card className="shadow-sm h-100">
+                <Card.Body>
+                  <Card.Subtitle className="text-muted mb-1">
+                    우편번호
+                  </Card.Subtitle>
+                  <Card.Text>{addr.zipcode}</Card.Text>
 
-        <Col md={9}>
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h4>등록된 주소</h4>
-            <Button onClick={() => navigate("/mypage/newaddress")}>
-              새 주소 추가
-            </Button>
-          </div>
+                  <Card.Subtitle className="text-muted mb-1">
+                    주소
+                  </Card.Subtitle>
+                  <Card.Text>{addr.address}</Card.Text>
 
-          <Row>
-            {addressList.length === 0 ? (
-              <p>등록된 주소가 없습니다.</p>
-            ) : (
-              addressList.map((addr) => (
-                <Col md={6} lg={4} key={addr.id} className="mb-4">
-                  <Card className="shadow-sm h-100">
-                    <Card.Body>
-                      <Card.Subtitle className="text-muted mb-1">
-                        우편번호
-                      </Card.Subtitle>
-                      <Card.Text>{addr.zipcode}</Card.Text>
+                  <div className="d-flex justify-content-between mt-3">
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => navigate(`/mypage/address/${addr.id}`)}
+                    >
+                      상세보기
+                    </Button>
 
-                      <Card.Subtitle className="text-muted mb-1">
-                        주소
-                      </Card.Subtitle>
-                      <Card.Text>{addr.address}</Card.Text>
+                    <Button
+                      variant="outline-success"
+                      size="sm"
+                      disabled={addr.isMain}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSetMain(addr.id);
+                      }}
+                    >
+                      {addr.isMain ? "대표 주소" : "대표로 설정"}
+                    </Button>
 
-                      <div className="d-flex justify-content-between mt-3">
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => navigate(`/mypage/address/${addr.id}`)}
-                        >
-                          상세보기
-                        </Button>
-
-                        <Button
-                          variant="outline-success"
-                          size="sm"
-                          disabled={addr.isMain}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSetMain(addr.id);
-                          }}
-                        >
-                          {addr.isMain ? "대표 주소" : "대표로 설정"}
-                        </Button>
-
-                        <Button
-                          variant="outline-danger"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(addr.id);
-                          }}
-                        >
-                          삭제
-                        </Button>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))
-            )}
-          </Row>
-        </Col>
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(addr.id);
+                      }}
+                    >
+                      삭제
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+            </Col>
+          ))
+        )}
       </Row>
     </Container>
   );

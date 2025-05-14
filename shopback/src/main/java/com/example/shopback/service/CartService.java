@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -122,5 +123,28 @@ public class CartService {
         cartItem.setModifiedAt(LocalDateTime.now());
 
         cartRepository.save(cartItem);
+    }
+
+    public List<CartItemDTO> getSelectedCartItems(String username, List<Long> ids){
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(()-> new RuntimeException("ユーザーが存在しません"));
+
+        return cartRepository.findByIdInAndUserId(ids, user.getId()).stream()
+                        .filter(cartItem -> !cartItem.isDeleted())
+                        .map(cartItem -> {
+                            Item item = cartItem.getItem();
+                            Optional<ItemImg> mainImg = item.getItemImgs().stream()
+                                            .filter(ItemImg::getMainImg)
+                                            .findFirst();
+                            return CartItemDTO.builder()
+                                    .cartItemId(cartItem.getId())
+                                    .itemId(item.getId())
+                                    .itemName(item.getItemname())
+                                    .description(item.getDescription())
+                                    .price(item.getPrice())
+                                    .quantity(cartItem.getQuantity())
+                                    .imgUrl(mainImg.map(ItemImg::getImgPath).orElse(null))
+                                    .build();
+                        }).collect(Collectors.toList());  
     }
 }  

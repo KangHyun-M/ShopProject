@@ -1,9 +1,9 @@
-// src/pages/admin/AdminItemList.jsx
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Container, Button, Card, Row, Col } from "react-bootstrap";
 import { categories } from "../component/categories";
+import Swal from "sweetalert2";
 
 export default function AdminItemList() {
   const [items, setItems] = useState([]);
@@ -15,42 +15,59 @@ export default function AdminItemList() {
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          alert("管理者しかアクセスできません");
+          Swal.fire("アクセス拒否", "管理者しかアクセスできません", "warning");
           navigate("/");
         }
       })
       .catch(() => {
-        alert("ログインしてください");
+        Swal.fire("ログインエラー", "ログインしてください", "error");
         navigate("/login");
       });
 
     axiosInstance
       .get("/items")
       .then((res) => setItems(res.data))
-      .catch((err) => console.error("商品リスト取得失敗", err));
+      .catch((err) => {
+        console.error("商品リスト取得失敗", err);
+        Swal.fire("エラー", "商品リストの取得に失敗しました", "error");
+      });
   }, [navigate]);
 
   const handleDelete = async (id) => {
-    if (!window.confirm("本当に削除しますか?")) return;
+    const result = await Swal.fire({
+      title: "確認",
+      text: "本当に削除しますか?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "はい",
+      cancelButtonText: "キャンセル",
+    });
+    if (!result.isConfirmed) return;
 
     try {
       await axiosInstance.put(`/admin/items/${id}/delete`);
-      alert("削除しました");
-      window.location.reload(); // 又は setItems()で更新
+      Swal.fire("削除完了", "商品が削除されました", "success");
+      setItems((prev) =>
+        prev.map((item) => (item.id === id ? { ...item, deleted: true } : item))
+      );
     } catch (err) {
       console.error("削除失敗", err);
-      alert("削除に失敗しました");
+      Swal.fire("エラー", "削除に失敗しました", "error");
     }
   };
 
   const handleRestore = async (id) => {
     try {
       await axiosInstance.put(`/admin/items/${id}/restore`);
-      alert("復旧しました");
-      window.location.reload();
+      Swal.fire("復旧完了", "商品が復旧されました", "success");
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, deleted: false } : item
+        )
+      );
     } catch (err) {
       console.error("復旧失敗", err);
-      alert("復旧に失敗しました");
+      Swal.fire("エラー", "復旧に失敗しました", "error");
     }
   };
 

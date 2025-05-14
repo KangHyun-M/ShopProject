@@ -4,7 +4,9 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +39,11 @@ public class OrderController {
         List<OrderDTO> orderList = orderService.getOrderList(username);
 
         return ResponseEntity.ok(orderList);
+    }
+
+    @DeleteMapping("/admin/orders/{orderId}")
+    public ResponseEntity<?> cancelOrder(@PathVariable Long orderId){
+        orderService.cancelOrder(orderId);
+        return ResponseEntity.ok("注文キャンセル完了");
     }
 }

@@ -1,5 +1,7 @@
 package com.example.shopback.controller;
 
+import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,4 +68,17 @@ public class CartController {
             return ResponseEntity.ok("数量変更完了");
 
     }
+
+    @GetMapping("/user/cart/sum")
+    public ResponseEntity<List<CartItemDTO>> getCartSum(@RequestParam String ids, Principal principal){
+        String username = principal.getName();
+        List<Long> idList = Arrays.stream(ids.split(","))
+                              .map(Long::parseLong)
+                              .toList();
+        List<CartItemDTO> result = cartService.getSelectedCartItems(username, idList);
+        
+        return ResponseEntity.ok(result);
+    }
+
+    
 }
