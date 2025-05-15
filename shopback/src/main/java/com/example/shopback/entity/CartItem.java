@@ -17,36 +17,44 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// ✅ カートに追加された商品情報を表すエンティティ
 @Entity
-@Getter@Setter
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Table(name = "CartItem")
 public class CartItem {
     
+    // ✅ カート項目ID（主キー、オートインクリメント）
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cart_item_id")
     private Long id;
 
+    // ✅ カートを所有するユーザー（外部キー）
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")       //회원테이블과 매핑     ユーザーテーブルとマッピング
+    @JoinColumn(name = "user_id") // ユーザーテーブルとのマッピング
     private User user;
 
+    // ✅ カートに追加された商品（外部キー）
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "item_id")       //상품테이블과 매핑핑   商品テーブルとマッピング
+    @JoinColumn(name = "item_id") // 商品テーブルとのマッピング
     private Item item;
 
+    // ✅ 購入数量
     @Column(name = "quantity")
     private int quantity;
 
+    // ✅ カートに追加された日時
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    // ✅ 最終更新日時
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt;
 
+    // ✅ 削除されたかどうか（ソフトデリート）
     @Builder.Default
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;

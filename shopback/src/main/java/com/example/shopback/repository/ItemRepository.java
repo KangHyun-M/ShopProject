@@ -7,16 +7,18 @@ import org.springframework.stereotype.Repository;
 
 import com.example.shopback.entity.Item;
 
-
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long>{
+public interface ItemRepository extends JpaRepository<Item, Long> {
     
-    //삭제 안된 상품 카테고리별로 조회      削除されてない商品をカテゴリー別に照会
+    // 삭제되지 않은 상품을 카테고리별로 조회
+    // 削除されていない商品をカテゴリ別に取得
     List<Item> findByCategoryAndDeletedFalse(String category);
 
-    // 삭제되지 않은 상품 전체 조회         削除されてない全商品を照会
+    // 삭제되지 않은 전체 상품을 조회
+    // 削除されていない全ての商品を取得
     List<Item> findByDeletedFalse();
     
-    // 삭제된 상품만 조회                   削除済の商品のみ照会
+    // 삭제된 상품만 조회
+    // 削除済みの商品だけを取得
     List<Item> findByDeletedTrue();
 }

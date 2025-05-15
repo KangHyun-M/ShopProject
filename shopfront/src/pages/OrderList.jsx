@@ -9,6 +9,7 @@ export default function OrderList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // 注文履歴を取得
   useEffect(() => {
     axiosInstance
       .get("/user/orders")
@@ -20,15 +21,17 @@ export default function OrderList() {
       .finally(() => setLoading(false));
   }, []);
 
+  // 商品詳細ページへ移動
   const goToDetail = (itemId) => {
     navigate(`/items/${itemId}`);
   };
 
+  // ローディング中のスピナー
   if (loading) {
     return (
       <div className="text-center mt-5">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2">読み込み中…</p>
+        <p className="mt-2">読み込み中です...</p>
       </div>
     );
   }
@@ -36,25 +39,29 @@ export default function OrderList() {
   return (
     <Container className="py-4">
       <h3 className="mb-4 fw-bold">📦 注文履歴</h3>
+
+      {/* 注文がない場合 */}
       {orders.length === 0 ? (
-        <p className="text-muted">注文履歴がありません</p>
+        <p className="text-muted">注文履歴がありません。</p>
       ) : (
+        // 注文ごとのカード表示
         orders.map((order) => (
           <Card key={order.orderId} className="mb-4 shadow-sm">
             <Card.Header className="bg-white">
-              <strong>注文日:</strong>{" "}
+              <strong>注文日：</strong>{" "}
               {new Date(order.orderAt).toLocaleString()}
               <Badge bg="secondary" className="ms-2">
                 {order.items.length} 件
               </Badge>
               <div className="text-muted mt-1 small">
-                <i className="bi bi-geo-alt"></i> 配送先: [{order.deliveryZip}]{" "}
+                <i className="bi bi-geo-alt"></i> 配送先：[{order.deliveryZip}]{" "}
                 {order.deliveryAddr}
               </div>
             </Card.Header>
 
             <Card.Body>
               <Row>
+                {/* 注文内の商品一覧 */}
                 {order.items.map((item, idx) => (
                   <Col
                     key={idx}

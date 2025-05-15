@@ -1,6 +1,5 @@
-// src/pages/Login.jsx
 import React, { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom"; // Link 추가
 import { useAuth } from "../component/authContext";
 import { Form, Button, Card } from "react-bootstrap";
 import Swal from "sweetalert2";
@@ -46,6 +45,7 @@ export default function Login() {
       >
         <Card.Body>
           <h3 className="text-center mb-4 fw-bold text-primary">🔐 ログイン</h3>
+
           <Form onSubmit={handleLogin}>
             <Form.Group className="mb-3" controlId="username">
               <Form.Label>ID</Form.Label>
@@ -69,7 +69,7 @@ export default function Login() {
               />
             </Form.Group>
 
-            <div className="d-grid">
+            <div className="d-grid mb-3">
               <Button
                 type="submit"
                 variant="primary"
@@ -83,6 +83,22 @@ export default function Login() {
               </Button>
             </div>
           </Form>
+
+          {/* 🔽 ID / PW 찾기 링크 추가 부분 */}
+          <div className="text-center mt-2">
+            <Link
+              to="/findid"
+              className="d-block text-decoration-none mb-1 text-primary"
+            >
+              🔍 IDを忘れた方
+            </Link>
+            <Link
+              to="/findpw"
+              className="d-block text-decoration-none text-primary"
+            >
+              🔐 パスワードを忘れた方
+            </Link>
+          </div>
         </Card.Body>
       </Card>
     </div>

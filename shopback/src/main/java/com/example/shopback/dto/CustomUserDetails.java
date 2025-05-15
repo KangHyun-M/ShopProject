@@ -8,60 +8,69 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.example.shopback.entity.User;
 
+// ✅ Spring Security認証用のユーザー詳細情報クラス
 public class CustomUserDetails implements UserDetails {
-    
-    
+
     private User user;
 
-    public CustomUserDetails(User user){
+    public CustomUserDetails(User user) {
         this.user = user;
     }
 
+    // ✅ 権限リストを返却（ROLE_付き）
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities(){
+    public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> authorities = new ArrayList<>();
 
-        //Role enum에서 권한을 가져와서 설정    Role enumから権限を貰い、権限を設定
-        //Role Enum을 문자열로 변환하여 권한 부여　Role enumを文字列に変換し、権限を付与
-        authorities.add(()-> "ROLE_" + user.getRole().name());
+        // Role列挙型を "ROLE_〇〇" 形式に変換して追加
+        authorities.add(() -> "ROLE_" + user.getRole().name());
+
         return authorities;
     }
 
+    // ✅ パスワードを返却（エンコード済）
     @Override
-    public String getPassword(){
-        return user.getPassword(); //비밀번호   安心番号/パスワード
+    public String getPassword() {
+        return user.getPassword(); // パスワード
     }
 
+    // ✅ ログインIDとして使用するユーザー名（メールアドレス）
     @Override
-    public String getUsername(){
-        return user.getUsername(); //이메일을 username으로 사용 メールアドレスをusernameに使う
+    public String getUsername() {
+        return user.getUsername(); // メールアドレスをユーザーIDとして使用
     }
 
-    public String getUserEmail(){
+    // ✅ メールアドレスを返却（別名メソッド）
+    public String getUserEmail() {
         return user.getUsername();
     }
 
-    public String getRole(){
+    // ✅ 権限名を文字列で取得（例: ADMIN / USER）
+    public String getRole() {
         return user.getRole().name();
     }
 
+    // ✅ アカウントの有効期限切れチェック（常に有効）
     @Override
-    public boolean isAccountNonExpired(){
-        return true; //계정 만료되지 않음       アカウントが満了されていない
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
+    // ✅ アカウントロック状態チェック（常に非ロック）
     @Override
-    public boolean isAccountNonLocked(){
-        return true; //계정 잠금되지 않음       アカウントがロックされていない
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
+    // ✅ 資格情報（パスワード）の有効期限切れチェック（常に有効）
     @Override
-    public boolean isCredentialsNonExpired(){
-        return true; //자격증명 만료되지 않음   資格証明が満了されていない
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
+    // ✅ アカウント有効性チェック（常に有効）
     @Override
-    public boolean isEnabled(){
-        return true; //활성화된 계정            活性化されているアカウント
+    public boolean isEnabled() {
+        return true;
     }
 }

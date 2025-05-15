@@ -12,10 +12,11 @@ export default function SideBar() {
         padding: "20px",
       }}
     >
+      {/* 管理メニューのタイトル */}
       <h5 className="mb-4 fw-bold">管理メニュー</h5>
 
       <Accordion alwaysOpen flush>
-        {/* 会員管理 */}
+        {/* 会員管理セクション */}
         <Accordion.Item eventKey="0">
           <Accordion.Header>会員管理</Accordion.Header>
           <Accordion.Body className="p-0">
@@ -27,7 +28,7 @@ export default function SideBar() {
           </Accordion.Body>
         </Accordion.Item>
 
-        {/* 商品管理 */}
+        {/* 商品管理セクション */}
         <Accordion.Item eventKey="1">
           <Accordion.Header>商品管理</Accordion.Header>
           <Accordion.Body className="p-0">

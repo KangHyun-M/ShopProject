@@ -11,9 +11,14 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class OrderItemDTO {
-    private String itemName;
-    private int quantity;
-    private int price;
-    private String imgPath;
-    private Long itemId;
+
+    private String itemName;   // 商品名
+
+    private int quantity;      // 注文数量
+
+    private int price;         // 単価（注文時の価格）
+
+    private String imgPath;    // 商品画像のパス（代表画像）
+
+    private Long itemId;       // 商品ID（商品詳細ページなどで使用）
 }

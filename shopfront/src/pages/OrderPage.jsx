@@ -1,4 +1,3 @@
-// src/pages/OrderPage.jsx
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Container, Form, InputGroup } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -9,11 +8,14 @@ import AddressModal from "./AddressModal";
 export default function OrderPage() {
   const navigate = useNavigate();
   const location = useLocation();
+
+  // カート内の注文対象ID一覧（state経由）
   const selectedCartItems = useMemo(
     () => location.state?.cartItemIds || [],
     [location.state]
   );
 
+  // 住所とカート詳細の状態
   const [addressList, setAddressList] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [newZipcode, setNewZipcode] = useState("");
@@ -25,13 +27,16 @@ export default function OrderPage() {
   const [showModal, setShowModal] = useState(false);
   const [cartDetails, setCartDetails] = useState([]);
 
+  // 初期データ取得（住所 & カート内容）
   useEffect(() => {
+    // ユーザーの住所一覧
     axiosInstance.get("/user/address").then((res) => {
       setAddressList(res.data);
       const main = res.data.find((addr) => addr.isMain);
       if (main) setSelectedAddress(main);
     });
 
+    // 選択されたカート商品詳細
     if (selectedCartItems.length > 0) {
       axiosInstance
         .get("/user/cart/sum", {
@@ -42,8 +47,10 @@ export default function OrderPage() {
     }
   }, [selectedCartItems]);
 
+  // 注文送信処理
   const handleSubmit = async () => {
     const fullAddress = address1 + address2 + address3 + banji + detail;
+
     const data = {
       cartItemIds: selectedCartItems,
       zipcode: newZipcode || selectedAddress?.zipcode,
@@ -70,6 +77,7 @@ export default function OrderPage() {
     <Container className="py-4" style={{ maxWidth: "600px" }}>
       <h3 className="mb-4">📦 注文ページ</h3>
 
+      {/* 注文商品一覧 */}
       <Card className="p-3 shadow-sm mb-4">
         <h5 className="mb-3">🛍 注文商品</h5>
         {cartDetails.map((item) => (
@@ -91,6 +99,7 @@ export default function OrderPage() {
         ))}
       </Card>
 
+      {/* 既存住所の選択 */}
       <Card className="p-3 shadow-sm mb-4">
         <h5 className="mb-3">🏠 配送先選択</h5>
         <Form>
@@ -101,7 +110,7 @@ export default function OrderPage() {
               name="address"
               id={`addr-${addr.id}`}
               label={`[${addr.zipcode}] ${addr.address} ${
-                addr.isMain ? "(代表住所)" : ""
+                addr.isMain ? "（代表）" : ""
               }`}
               checked={selectedAddress?.id === addr.id}
               onChange={() => setSelectedAddress(addr)}
@@ -111,8 +120,11 @@ export default function OrderPage() {
         </Form>
       </Card>
 
+      {/* 新しい住所入力 */}
       <Card className="p-3 shadow-sm mb-4">
-        <h5 className="mb-3">🆕 新しい住所</h5>
+        <h5 className="mb-3">🆕 新しい住所を入力</h5>
+
+        {/* 郵便番号 + 住所検索 */}
         <InputGroup className="mb-3">
           <Form.Control
             placeholder="郵便番号"
@@ -126,14 +138,20 @@ export default function OrderPage() {
             住所検索
           </Button>
         </InputGroup>
+
+        {/* 都道府県 */}
         <Form.Group className="mb-2">
           <Form.Label>都道府県</Form.Label>
           <Form.Control type="text" value={address1} readOnly />
         </Form.Group>
+
+        {/* 市区町村 */}
         <Form.Group className="mb-2">
           <Form.Label>市区町村</Form.Label>
           <Form.Control type="text" value={address2} readOnly />
         </Form.Group>
+
+        {/* 町名・番地 */}
         <Form.Group className="mb-2">
           <Form.Label>町名・番地</Form.Label>
           <Form.Control
@@ -143,6 +161,8 @@ export default function OrderPage() {
             placeholder="番地を入力 (例: 5丁目7番地)"
           />
         </Form.Group>
+
+        {/* 建物名など */}
         <Form.Group>
           <Form.Label>建物名・部屋番号など</Form.Label>
           <Form.Control
@@ -154,12 +174,14 @@ export default function OrderPage() {
         </Form.Group>
       </Card>
 
+      {/* 注文実行ボタン */}
       <div className="text-end">
         <Button variant="success" onClick={handleSubmit}>
           注文する
         </Button>
       </div>
 
+      {/* 郵便番号検索モーダル */}
       <AddressModal
         show={showModal}
         initialZipcode={newZipcode}

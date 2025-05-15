@@ -27,20 +27,19 @@ public class OrderItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_item_id")
-    private Long id;
+    private Long id; // 注文アイテムID（主キー）
 
     @Column(name = "quantity")
-    private int quantity;
+    private int quantity; // 注文数量
 
     @Column(name = "price")
-    private int price;
+    private int price; // 単価（注文時点の価格）
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id")
-    private Order order;
+    private Order order; // 注文エンティティとの関連（多対一）
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id")
-    private Item item;
-
+    private Item item; // 商品エンティティとの関連（多対一）
 }

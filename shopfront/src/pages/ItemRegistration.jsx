@@ -1,4 +1,3 @@
-// src/pages/ItemRegistration.jsx
 import React, { useState, useEffect } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
@@ -16,16 +15,21 @@ import Swal from "sweetalert2";
 
 export default function ItemRegistration() {
   const navigate = useNavigate();
+
+  // フォーム入力状態
   const [form, setForm] = useState({
     itemname: "",
     description: "",
     price: 0,
     category: "",
   });
+
+  // 画像ファイル・プレビュー
   const [images, setImages] = useState([]);
   const [previewImages, setPreviewImages] = useState([]);
   const [mainImageIndex, setMainImageIndex] = useState(0);
 
+  // 管理者チェック（未ログイン or 一般ユーザーならリダイレクト）
   useEffect(() => {
     axiosInstance
       .get("/me")
@@ -41,11 +45,13 @@ export default function ItemRegistration() {
       });
   }, [navigate]);
 
+  // 入力変更ハンドラー
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // 画像アップロード時の処理（プレビュー生成）
   const handleImageChange = (e) => {
     const files = [...e.target.files];
     setImages(files);
@@ -57,6 +63,7 @@ export default function ItemRegistration() {
     setPreviewImages(previews);
   };
 
+  // 商品登録実行
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -90,7 +97,10 @@ export default function ItemRegistration() {
     <Container style={{ maxWidth: "700px" }} className="py-4">
       <Card className="p-4 shadow-sm">
         <h3 className="mb-4 text-center">商品登録</h3>
+
+        {/* 商品登録フォーム */}
         <Form onSubmit={handleSubmit}>
+          {/* 商品名 */}
           <Form.Group className="mb-3">
             <Form.Label>商品名</Form.Label>
             <Form.Control
@@ -101,6 +111,7 @@ export default function ItemRegistration() {
             />
           </Form.Group>
 
+          {/* 商品説明 */}
           <Form.Group className="mb-3">
             <Form.Label>説明</Form.Label>
             <Form.Control
@@ -113,6 +124,7 @@ export default function ItemRegistration() {
             />
           </Form.Group>
 
+          {/* 価格 */}
           <Form.Group className="mb-3">
             <Form.Label>価格</Form.Label>
             <Form.Control
@@ -124,6 +136,7 @@ export default function ItemRegistration() {
             />
           </Form.Group>
 
+          {/* カテゴリー選択 */}
           <Form.Group className="mb-3">
             <Form.Label>カテゴリー</Form.Label>
             <Form.Select
@@ -132,7 +145,7 @@ export default function ItemRegistration() {
               onChange={handleChange}
               required
             >
-              <option value="">選択</option>
+              <option value="">選択してください</option>
               {categories.map((cat, idx) => (
                 <option key={idx} value={cat}>
                   {cat}
@@ -141,8 +154,9 @@ export default function ItemRegistration() {
             </Form.Select>
           </Form.Group>
 
+          {/* 画像アップロード */}
           <Form.Group className="mb-3">
-            <Form.Label>イメージアップロード</Form.Label>
+            <Form.Label>商品画像アップロード</Form.Label>
             <Form.Control
               type="file"
               accept="image/*"
@@ -151,9 +165,10 @@ export default function ItemRegistration() {
             />
           </Form.Group>
 
+          {/* サムネイル選択（メイン画像） */}
           {previewImages.length > 0 && (
             <div className="mb-3">
-              <Form.Label>サムネイル選択</Form.Label>
+              <Form.Label>サムネイル選択（メイン画像）</Form.Label>
               <Row>
                 {previewImages.map((img, index) => (
                   <Col xs={6} md={4} key={index} className="mb-3 text-center">
@@ -177,9 +192,10 @@ export default function ItemRegistration() {
             </div>
           )}
 
+          {/* 登録ボタン */}
           <div className="text-center">
             <Button type="submit" variant="primary">
-              登録
+              登録する
             </Button>
           </div>
         </Form>

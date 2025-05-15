@@ -13,7 +13,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class OrderRequestDTO {
-    private List<Long> cartItemIds;
-    private String zipcode;
-    private String address;
+
+    private List<Long> cartItemIds; // カート内の商品IDリスト（注文対象）
+
+    private String zipcode;         // 配送先の郵便番号
+
+    private String address;         // 配送先の住所
 }

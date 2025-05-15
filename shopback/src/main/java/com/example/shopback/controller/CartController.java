@@ -28,10 +28,11 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
-    
+
+    // 🛒 ログインユーザーのカート一覧を取得
     @GetMapping("/user/cart")
     public ResponseEntity<List<CartItemDTO>> getUserCart(Authentication authentication){
-        if(authentication == null || !authentication.isAuthenticated()){
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -40,18 +41,19 @@ public class CartController {
         return ResponseEntity.ok(cartItems);
     }
 
+    // 🛒 カートに商品追加
     @PostMapping("/user/cart")
     public ResponseEntity<?> addCart(@RequestBody CartRequestDTO cartRequestDTO, Authentication authentication){
-        if(authentication == null || !authentication.isAuthenticated()){
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("ログインしてください");
         }
 
         String username = authentication.getName();
-
         cartService.addCart(username, cartRequestDTO.getItemId(), cartRequestDTO.getQuantity());
         return ResponseEntity.ok("カートに追加完了");
     }
 
+    // 🗑 カートから商品削除（ソフトデリート）
     @DeleteMapping("/user/cart/{cartItemId}")
     public ResponseEntity<?> deleteCartItem(@PathVariable Long cartItemId, Authentication auth){
         String username = auth.getName();
@@ -59,26 +61,29 @@ public class CartController {
         return ResponseEntity.ok("削除完了");
     }
 
+    // 🔄 カート内商品の数量を変更
     @PatchMapping("/user/cart/{cartItemId}")
     public ResponseEntity<?> updateQuantity(
         @PathVariable Long cartItemId,
         @RequestParam int quantity,
         Authentication auth){
-            cartService.updateQuantity(auth.getName(), cartItemId, quantity);
-            return ResponseEntity.ok("数量変更完了");
-
+        
+        cartService.updateQuantity(auth.getName(), cartItemId, quantity);
+        return ResponseEntity.ok("数量変更完了");
     }
 
+    // 🧾 カート内選択商品（注文対象）を取得
     @GetMapping("/user/cart/sum")
     public ResponseEntity<List<CartItemDTO>> getCartSum(@RequestParam String ids, Principal principal){
         String username = principal.getName();
+
+        // クエリパラメータのID群（カンマ区切り）をLongリストに変換
         List<Long> idList = Arrays.stream(ids.split(","))
-                              .map(Long::parseLong)
-                              .toList();
+                                  .map(Long::parseLong)
+                                  .toList();
+
         List<CartItemDTO> result = cartService.getSelectedCartItems(username, idList);
-        
         return ResponseEntity.ok(result);
     }
 
-    
 }

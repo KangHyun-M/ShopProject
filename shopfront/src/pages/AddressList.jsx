@@ -14,14 +14,14 @@ export default function AddressList() {
       .then((res) => {
         const role = res.data.role;
         if (role !== "USER" && role !== "ADMIN") {
-          alert("관리자 및 유저만 접근 가능합니다");
+          alert("管理者またはユーザーのみアクセス可能です");
           navigate("/");
         } else {
           fetchAddressList();
         }
       })
       .catch(() => {
-        alert("로그인이 필요합니다");
+        alert("ログインが必要です");
         navigate("/login");
       });
   }, [navigate]);
@@ -31,33 +31,33 @@ export default function AddressList() {
       .get("/user/address")
       .then((res) => setAddressList(res.data))
       .catch((err) => {
-        console.error("주소 불러오기 실패", err);
-        alert("주소 정보를 불러올 수 없습니다");
+        console.error("住所取得失敗", err);
+        alert("住所情報を取得できませんでした");
       })
       .finally(() => setLoading(false));
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("이 주소를 정말 삭제하시겠습니까?")) return;
+    if (!window.confirm("この住所を本当に削除しますか？")) return;
 
     try {
       await axiosInstance.delete(`/user/address/${id}`);
-      alert("주소가 삭제되었습니다");
+      alert("住所が削除されました");
       setAddressList((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
-      console.error("주소 삭제 실패", err);
-      alert("삭제에 실패했습니다");
+      console.error("住所削除失敗", err);
+      alert("削除に失敗しました");
     }
   };
 
   const handleSetMain = async (id) => {
     try {
       await axiosInstance.patch(`/user/address/${id}/main`);
-      alert("대표 주소가 설정되었습니다");
+      alert("メイン住所に設定されました");
       fetchAddressList();
     } catch (err) {
-      console.error("대표 주소 설정 실패", err);
-      alert("대표 주소 설정에 실패했습니다");
+      console.error("メイン住所設定失敗", err);
+      alert("メイン住所の設定に失敗しました");
     }
   };
 
@@ -72,27 +72,27 @@ export default function AddressList() {
   return (
     <Container fluid className="py-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <h4>등록된 주소</h4>
+        <h4>登録された住所</h4>
         <Button onClick={() => navigate("/mypage/newaddress")}>
-          새 주소 추가
+          新しい住所を追加
         </Button>
       </div>
 
       <Row>
         {addressList.length === 0 ? (
-          <p>등록된 주소가 없습니다.</p>
+          <p>登録された住所がありません。</p>
         ) : (
           addressList.map((addr) => (
             <Col md={6} lg={4} key={addr.id} className="mb-4">
               <Card className="shadow-sm h-100">
                 <Card.Body>
                   <Card.Subtitle className="text-muted mb-1">
-                    우편번호
+                    郵便番号
                   </Card.Subtitle>
                   <Card.Text>{addr.zipcode}</Card.Text>
 
                   <Card.Subtitle className="text-muted mb-1">
-                    주소
+                    住所
                   </Card.Subtitle>
                   <Card.Text>{addr.address}</Card.Text>
 
@@ -102,7 +102,7 @@ export default function AddressList() {
                       size="sm"
                       onClick={() => navigate(`/mypage/address/${addr.id}`)}
                     >
-                      상세보기
+                      詳細を見る
                     </Button>
 
                     <Button
@@ -114,7 +114,7 @@ export default function AddressList() {
                         handleSetMain(addr.id);
                       }}
                     >
-                      {addr.isMain ? "대표 주소" : "대표로 설정"}
+                      {addr.isMain ? "メイン住所" : "メインに設定"}
                     </Button>
 
                     <Button
@@ -125,7 +125,7 @@ export default function AddressList() {
                         handleDelete(addr.id);
                       }}
                     >
-                      삭제
+                      削除
                     </Button>
                   </div>
                 </Card.Body>

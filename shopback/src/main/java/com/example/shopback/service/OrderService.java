@@ -33,13 +33,16 @@ public class OrderService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
 
+    // 注文処理
     @Transactional
     public void placeOrder(String username, OrderRequestDTO request) {
+        // ユーザー取得（住所付き）
         User user = userRepository.findWithAddressByUsername(username)
                 .orElseThrow(() -> new RuntimeException("ユーザーが存在しません"));
 
         List<OrderItem> orderItems = new ArrayList<>();
 
+        // カート商品を注文商品に変換
         for (Long cartItemId : request.getCartItemIds()) {
             CartItem cartItem = cartRepository.findById(cartItemId)
                     .orElseThrow(() -> new RuntimeException("カート商品が見つかりません"));
@@ -48,6 +51,7 @@ public class OrderService {
                 throw new RuntimeException("他人のカートです");
             }
 
+            // 注文商品エンティティ生成
             OrderItem orderItem = OrderItem.builder()
                     .item(cartItem.getItem())
                     .quantity(cartItem.getQuantity())
@@ -56,18 +60,18 @@ public class OrderService {
 
             orderItems.add(orderItem);
 
-            // 카트 아이템 soft delete 처리
+            // カート商品は削除扱いに変更（論理削除）
             cartItem.setDeleted(true);
             cartItem.setModifiedAt(LocalDateTime.now());
         }
 
-        // 주소 엔티티 생성
+        // 配送先情報エンティティ生成
         OrderAddress orderAddress = OrderAddress.builder()
                 .zipcode(request.getZipcode())
                 .address(request.getAddress())
                 .build();
 
-        // 주문 생성
+        // 注文エンティティ生成
         Order order = Order.builder()
                 .user(user)
                 .orderItems(orderItems)
@@ -75,29 +79,31 @@ public class OrderService {
                 .orderAddress(orderAddress)
                 .build();
 
-        //양방향 연관관계 설정
+        // 双方向関連設定（注文⇄住所）
         orderAddress.setOrder(order);
 
-        // 주문 아이템에도 order 설정
+        // 注文商品に注文情報を設定
         order.getOrderItems().forEach(item -> item.setOrder(order));
 
-        // 저장
+        // 注文保存
         orderRepository.save(order);
     }
 
-
+    // 注文履歴を取得
     public List<OrderDTO> getOrderList(String username) {
+        // ユーザー取得（注文情報付き）
         User user = userRepository.findWithOrdersByUsername(username)
                 .orElseThrow(() -> new RuntimeException("ユーザーが存在しません"));
 
         return user.getOrders().stream()
                 .map(order -> {
-                        OrderAddress orderAddress = order.getOrderAddress();
-                        String zip = orderAddress != null ? orderAddress.getZipcode() : "";
-                        String addr = orderAddress != null ? orderAddress.getAddress() : "";
+                    OrderAddress orderAddress = order.getOrderAddress();
+                    String zip = orderAddress != null ? orderAddress.getZipcode() : "";
+                    String addr = orderAddress != null ? orderAddress.getAddress() : "";
 
-                        List<OrderItemDTO> items = order.getOrderItems().stream()
-                                .map(oi -> {
+                    // 注文商品のDTO変換
+                    List<OrderItemDTO> items = order.getOrderItems().stream()
+                            .map(oi -> {
                                 Item item = oi.getItem();
                                 Optional<ItemImg> mainImg = item.getItemImgs().stream()
                                         .filter(ItemImg::getMainImg)
@@ -110,25 +116,26 @@ public class OrderService {
                                         .imgPath(mainImg.map(ItemImg::getImgPath).orElse(null))
                                         .itemId(item.getId())
                                         .build();
-                                })
-                                .collect(Collectors.toList());
+                            })
+                            .collect(Collectors.toList());
 
-                        return OrderDTO.builder()
-                                .orderId(order.getId())
-                                .orderAt(order.getOrderAt())
-                                .deliveryZip(zip)
-                                .deliveryAddr(addr)
-                                .items(items)
-                                .build();
+                    return OrderDTO.builder()
+                            .orderId(order.getId())
+                            .orderAt(order.getOrderAt())
+                            .deliveryZip(zip)
+                            .deliveryAddr(addr)
+                            .items(items)
+                            .build();
                 })
                 .collect(Collectors.toList());
-        }
-    
-     @Transactional
-     public void cancelOrder(Long orderId){
+    }
+
+    // 注文キャンセル処理
+    @Transactional
+    public void cancelOrder(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("注文が見つかりません"));
 
         orderRepository.delete(order);
-     }
+    }
 }

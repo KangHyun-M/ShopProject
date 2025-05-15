@@ -2,6 +2,7 @@ package com.example.shopback.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,9 @@ import com.example.shopback.repository.UserRepository;
 
 @Service
 public class UserService {
-    
+
+    @Autowired
+    private EmailService emailService;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -34,71 +37,60 @@ public class UserService {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-
-    //이메일 중복 확인      メールアドレスの重複確認
+    // メールアドレスの重複確認
     public boolean checkUsernameExists(String username){
         return userRepository.existsByUsername(username);
     }
 
-    //닉네임 중복 확인      ニックネームの重複確認
+    // ニックネームの重複確認
     public boolean checkUsernicExists(String usernic){
         return userRepository.existsByUsernic(usernic);
     }
 
-    
-
-
-    //저장된 비밀번호와 입력한 비밀번호 비교        保存済のパスワードと入力したパスワードを比較
+    // 入力されたパスワードと保存されたパスワードの一致確認
     public boolean matchPass(String rawPass, String encodedPassword){
         return bCryptPasswordEncoder.matches(rawPass, encodedPassword);
     }
 
-    //회원가입 처리     会員登録処理
+    // 会員登録処理
     public void signUp(UserDTO userDTO){
-        //비밀번호 확인     パスワード確認
+        // パスワード確認
         if(!userDTO.getPassword().equals(userDTO.getConfirmPass())){
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다");
+            throw new IllegalArgumentException("パスワードが一致しません");
         }
 
-        //메일 중복확인     メールアドレスの重複確認
+        // メールアドレス重複確認
         if(checkUsernameExists(userDTO.getUsername())){
-            throw new IllegalArgumentException("이미 존재하는 이메일입니다");
+            throw new IllegalArgumentException("すでに存在するメールアドレスです");
         }
 
-        //닉네임 중복확인   ニックネームの重複確認
+        // ニックネーム重複確認
         if(checkUsernicExists(userDTO.getUsernic())){
-            throw new IllegalArgumentException("이미 존재하는 닉네임입니다");
+            throw new IllegalArgumentException("すでに存在するニックネームです");
         }
 
-        //비밀번호 인코딩   パスワードの暗号化
+        // パスワードを暗号化して保存
         String encodePass = bCryptPasswordEncoder.encode(userDTO.getPassword());
 
         User user = toEntity(userDTO, encodePass);
         userRepository.save(user);
     }
 
-    //이메일로 사용자 조회      メールアドレスからユーザーを照会する
+    // メールアドレスからユーザー情報取得（住所含む）
     public UserDTO findByUsername(String username){
-       Optional<User> optionalUser = userRepository.findWithAddressByUsername(username); //EntityGraph 사용
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            return toDTO(user);
-        } else {
-            return null;
-        }
+        Optional<User> optionalUser = userRepository.findWithAddressByUsername(username);
+        return optionalUser.map(this::toDTO).orElse(null);
     }
 
-    //사용자 인증       ユーザー認証
+    // ユーザー認証処理（メールアドレス + パスワード）
     public boolean authenticate(String username, String password){
         Optional<User> optionalUser = userRepository.findWithAddressByUsername(username);
 
-        //값이 존재하는지 확인      値の存否確認
         if(!optionalUser.isPresent()){
             System.out.println("ログイン失敗: メールアドレスが存在しません");
             return false;
         }
 
-        //값이 존재하면 Optional에서 User객체 추출      値が存在する場合、OptionalからUser客体取得
         User user = optionalUser.get();
 
         if(!matchPass(password, user.getPassword())){
@@ -110,20 +102,20 @@ public class UserService {
         return true;
     }
 
+    // 管理者用：全ユーザー一覧取得
     public List<UserRequestDTO> getAllUsers(){
         List<User> users = userRepository.findAll();
-        
+
         return users.stream()
                 .map(user -> UserRequestDTO.builder()
                         .id(user.getId())
                         .username(user.getUsername())
                         .usernic(user.getUsernic())
                         .build())
-
                 .collect(Collectors.toList());
-                    
     }
 
+    // 管理者用：ユーザー詳細と注文情報取得
     public UserRequestDTO getUserDetail(Long userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new RuntimeException("ユーザーが見つかりません"));
@@ -165,21 +157,44 @@ public class UserService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .usernic(user.getUsernic())
-                .orders(orders) // ✅ 주문 정보 포함
+                .orders(orders)
                 .build();
     }
 
-    // DTO를 Entity로 변환      DTOをEntityに変換
+    // 🔐 仮パスワードを発行して保存し、メールで送信
+    public boolean TempPassword(String email) {
+        Optional<User> optionalUser = userRepository.findByUsername(email);
+
+        if (optionalUser.isEmpty()) return false;
+
+        String tempPassword = UUID.randomUUID().toString().substring(0, 10);
+        User user = optionalUser.get();
+
+        user.setPassword(bCryptPasswordEncoder.encode(tempPassword));
+        userRepository.save(user);
+
+        emailService.sendTempPassword(email, tempPassword);
+        return true;
+    }
+
+
+    // ニックネームからメールアドレス検索（ID探し）
+    public String findUsernameByUsernic(String usernic){
+        Optional<User> user = userRepository.findByUsernic(usernic);
+        return user.map(User::getUsername).orElse(null);
+    }
+
+    // DTO → Entity 変換
     private User toEntity(UserDTO userDTO, String encodedPassword) {
         return User.builder()
                 .username(userDTO.getUsername())
-                .password(encodedPassword)  // 암호화된 비밀번호 저장   暗号化されたパスワードを保存
+                .password(encodedPassword)
                 .role(Role.valueOf(userDTO.getRole()))
                 .usernic(userDTO.getUsernic())
                 .build();
     }
 
-    //EntityをDToに変換
+    // Entity → DTO 変換（代表住所を含む）
     private UserDTO toDTO(User user) {
         String address = null;
         String zipcode = null;
@@ -204,5 +219,24 @@ public class UserService {
                 .zipcode(zipcode)
                 .build();
     }
-    
+
+    // 🔐 パスワード変更処理
+    public boolean changePassword(String username, String currentPassword, String newPassword) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+
+        if (optionalUser.isEmpty()) return false;
+
+        User user = optionalUser.get();
+
+        // 現在のパスワードが一致するか確認
+        if (!bCryptPasswordEncoder.matches(currentPassword, user.getPassword())) {
+            return false;
+        }
+
+        // 新しいパスワードをハッシュ化して保存
+        String encoded = bCryptPasswordEncoder.encode(newPassword);
+        user.setPassword(encoded);
+        userRepository.save(user);
+        return true;
+    }
 }

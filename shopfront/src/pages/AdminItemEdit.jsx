@@ -33,7 +33,7 @@ export default function AdminItemEdit() {
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          Swal.fire("アクセス拒否", "管理者しかアクセスできません", "warning");
+          Swal.fire("アクセス拒否", "管理者のみアクセス可能です", "warning");
           navigate("/");
         }
       })
@@ -56,7 +56,7 @@ export default function AdminItemEdit() {
         setMainImage(res.data.mainImage || res.data.imagePaths?.[0] || "");
       })
       .catch(() => {
-        Swal.fire("エラー", "該当する商品は存在しません", "error");
+        Swal.fire("エラー", "該当する商品が見つかりませんでした", "error");
         navigate("/admin/items");
       });
   }, [id, navigate]);
@@ -95,12 +95,12 @@ export default function AdminItemEdit() {
       await axiosInstance.put(`/admin/items/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      Swal.fire("成功", "商品の修正が完了しました", "success").then(() => {
+      Swal.fire("成功", "商品情報が更新されました", "success").then(() => {
         navigate("/admin/items");
       });
     } catch (err) {
       console.error(err);
-      Swal.fire("エラー", "修正に失敗しました", "error");
+      Swal.fire("エラー", "商品情報の更新に失敗しました", "error");
     }
   };
 
@@ -114,15 +114,15 @@ export default function AdminItemEdit() {
   return (
     <Container className="py-4" style={{ maxWidth: "800px" }}>
       <Card className="p-4 shadow-sm">
-        <h3 className="mb-4 text-center">商品情報修正</h3>
+        <h3 className="mb-4 text-center">商品情報の編集</h3>
 
-        <h5>既存の画像</h5>
+        <h5>登録済み画像</h5>
         <Row className="mb-4">
           {existingImages.map((img, idx) => (
             <Col key={idx} xs={6} md={4} className="mb-3 text-center">
               <Image
                 src={img}
-                alt={`既存の画像 ${idx + 1}`}
+                alt={`画像 ${idx + 1}`}
                 thumbnail
                 style={{ height: "150px", objectFit: "contain" }}
               />
@@ -138,7 +138,7 @@ export default function AdminItemEdit() {
                 <Form.Check
                   type="radio"
                   name="mainImage"
-                  label="サムネイル"
+                  label="メイン画像に設定"
                   checked={mainImage === img}
                   onChange={() => setMainImage(img)}
                 />
@@ -160,7 +160,7 @@ export default function AdminItemEdit() {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>説明</Form.Label>
+            <Form.Label>商品説明</Form.Label>
             <Form.Control
               as="textarea"
               name="description"
@@ -172,7 +172,7 @@ export default function AdminItemEdit() {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>価格</Form.Label>
+            <Form.Label>価格（円）</Form.Label>
             <Form.Control
               type="number"
               name="price"
@@ -183,14 +183,14 @@ export default function AdminItemEdit() {
           </Form.Group>
 
           <Form.Group className="mb-3">
-            <Form.Label>カテゴリー</Form.Label>
+            <Form.Label>カテゴリ</Form.Label>
             <Form.Select
               name="category"
               value={form.category}
               onChange={handleChange}
               required
             >
-              <option value="">選択</option>
+              <option value="">選択してください</option>
               {categories.map((cat, idx) => (
                 <option key={idx} value={cat}>
                   {cat}
@@ -200,7 +200,7 @@ export default function AdminItemEdit() {
           </Form.Group>
 
           <Form.Group className="mb-4">
-            <Form.Label>追加イメージアップロード</Form.Label>
+            <Form.Label>新しい画像をアップロード</Form.Label>
             <Form.Control
               type="file"
               accept="image/*"
@@ -211,7 +211,7 @@ export default function AdminItemEdit() {
 
           <div className="text-end">
             <Button type="submit" variant="primary">
-              修正完了
+              保存する
             </Button>
           </div>
         </Form>

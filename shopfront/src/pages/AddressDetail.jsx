@@ -54,7 +54,7 @@ export default function AddressDetail() {
       })
       .catch((err) => {
         console.error("住所情報取得失敗", err);
-        Swal.fire("エラー", "住所情報を取得できません", "error");
+        Swal.fire("エラー", "住所情報を取得できませんでした", "error");
         navigate("/mypage/addresslist");
       });
   }, [id, navigate]);
@@ -87,7 +87,7 @@ export default function AddressDetail() {
       <Row>
         <Col md={9}>
           <Card className="p-4 shadow-sm">
-            <h4 className="mb-4">住所修正</h4>
+            <h4 className="mb-4">住所の編集</h4>
 
             <Form.Group className="mb-3">
               <Form.Label>郵便番号</Form.Label>
@@ -95,7 +95,7 @@ export default function AddressDetail() {
                 <Col xs={8}>
                   <Form.Control
                     type="text"
-                    placeholder="例: 0600062"
+                    placeholder="例：0600062"
                     value={zipcode}
                     onChange={(e) => setZipcode(e.target.value)}
                   />
@@ -137,7 +137,7 @@ export default function AddressDetail() {
               <Form.Label>建物名・部屋番号など</Form.Label>
               <Form.Control
                 type="text"
-                placeholder="例: ○○ビル101号室"
+                placeholder="例：○○ビル101号室"
                 value={detail}
                 onChange={(e) => setDetail(e.target.value)}
               />
@@ -145,7 +145,7 @@ export default function AddressDetail() {
 
             <div className="text-end">
               <Button variant="primary" onClick={handleUpdate}>
-                保存
+                保存する
               </Button>
             </div>
           </Card>

@@ -24,6 +24,9 @@ import OrderList from "./pages/OrderList";
 import OrderPage from "./pages/OrderPage";
 import UserDetail from "./pages/UserDetail";
 import UserList from "./pages/UserList";
+import FindId from "./pages/FindId";
+import FindPassword from "./pages/FindPassword";
+import ChangePassword from "./pages/ChangePassword";
 
 export default function AppLayout() {
   const location = useLocation();
@@ -48,12 +51,18 @@ export default function AppLayout() {
             <Route path="/items/:id" element={<ItemDetail />} />
             <Route path="/user/cart" element={<CartPage />} />
             <Route path="/user/address" element={<Address />} />
+            <Route path="/findid" element={<FindId />} />
+            <Route path="/findpw" element={<FindPassword />} />
 
             {/* 마이페이지 라우트 */}
             <Route path="/mypage/info" element={<UserInfo />} />
             <Route path="/mypage/newaddress" element={<Address />} />
             <Route path="/mypage/addresslist" element={<AddressList />} />
             <Route path="/mypage/address/:id" element={<AddressDetail />} />
+            <Route
+              path="/mypage/change-password"
+              element={<ChangePassword />}
+            />
 
             {/* 관리자 라우트 */}
             <Route path="/admin" element={<AdminPage />} />

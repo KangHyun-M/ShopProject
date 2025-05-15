@@ -6,20 +6,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter@Setter
+@Getter @Setter
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
 public class UserDTO {
-    
-    private String username;    //아이디                ID
-    private String password;    //비밀번호              安心番号/パスワード
-    private String confirmPass; //비밀번호 재확인용     安心番号/パスワード再確認
-    private String verificationCode; //인증번호         認証番号
-    private String usernic;     //닉네임                ニックネーム
-    private String role;        //권한                  権限
 
-    private String address;
-    private String zipcode;
+    private String username;           // ID（メールアドレス）
+    private String password;           // パスワード
+    private String confirmPass;        // パスワード再確認用
+    private String verificationCode;   // 認証コード（メール認証）
+    private String usernic;            // ニックネーム
+    private String role;               // 権限（例: USER, ADMIN）
 
+    private String address;            // 代表住所（オプション）
+    private String zipcode;            // 郵便番号（オプション）
 }

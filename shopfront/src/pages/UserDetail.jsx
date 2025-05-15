@@ -17,6 +17,7 @@ export default function UserDetail() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // ユーザー情報取得
   useEffect(() => {
     axiosInstance
       .get(`/admin/users/${userId}`)
@@ -28,6 +29,7 @@ export default function UserDetail() {
       .finally(() => setLoading(false));
   }, [userId]);
 
+  // 注文キャンセル処理
   const cancelOrder = (orderId) => {
     Swal.fire({
       title: "注文をキャンセルしますか？",
@@ -57,11 +59,12 @@ export default function UserDetail() {
     });
   };
 
+  // ローディング表示
   if (loading) {
     return (
       <div className="text-center mt-5">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2">読み込み中…</p>
+        <p className="mt-2">読み込み中です...</p>
       </div>
     );
   }
@@ -72,35 +75,38 @@ export default function UserDetail() {
     <Container className="py-4">
       <h3 className="fw-bold mb-4">👤 ユーザー詳細</h3>
 
+      {/* ユーザー情報カード */}
       <Card className="mb-4 p-3">
         <p>
-          <strong>ID:</strong> {user.username}
+          <strong>ID：</strong> {user.username}
         </p>
         <p>
-          <strong>ニックネーム:</strong> {user.usernic}
+          <strong>ニックネーム：</strong> {user.usernic}
         </p>
       </Card>
 
+      {/* 注文履歴セクション */}
       <h5 className="mb-3">📦 注文履歴</h5>
 
       {user.orders.length === 0 ? (
-        <p className="text-muted">注文履歴がありません</p>
+        <p className="text-muted">注文履歴がありません。</p>
       ) : (
         user.orders.map((order) => (
           <Card key={order.orderId} className="mb-4 shadow-sm">
             <Card.Header className="bg-white">
-              <strong>注文日:</strong>{" "}
+              <strong>注文日：</strong>{" "}
               {new Date(order.orderAt).toLocaleString()}{" "}
               <Badge bg="secondary" className="ms-2">
                 {order.items.length} 件
               </Badge>
               <div className="text-muted mt-1 small">
-                配送先: [{order.deliveryZip}] {order.deliveryAddr}
+                配送先：[{order.deliveryZip}] {order.deliveryAddr}
               </div>
             </Card.Header>
 
             <Card.Body>
               <Row>
+                {/* 商品リスト */}
                 {order.items.map((item, idx) => (
                   <Col
                     key={idx}
@@ -131,6 +137,7 @@ export default function UserDetail() {
                 ))}
               </Row>
 
+              {/* 注文キャンセルボタン */}
               <div className="text-end">
                 <Button
                   variant="danger"

@@ -3,6 +3,7 @@ import { Button, Card, Container, Row, Col } from "react-bootstrap";
 import axiosInstance from "../component/axiosInstance";
 import { Link } from "react-router-dom";
 
+// カテゴリ一覧（"Total"はすべて）
 const categories = [
   "Total",
   "CPU",
@@ -17,10 +18,12 @@ export default function Home() {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("Total");
 
+  // 商品一覧を取得
   useEffect(() => {
     axiosInstance.get("/items").then((res) => setProducts(res.data));
   }, []);
 
+  // 選択されたカテゴリで商品をフィルタリング
   const filteredProducts =
     selectedCategory === "Total"
       ? products
@@ -28,10 +31,12 @@ export default function Home() {
 
   return (
     <Container className="py-4">
+      {/* タイトル */}
       <h1 className="mb-4 text-center text-primary fw-bold">
         パソコン・パーツストア
       </h1>
 
+      {/* カテゴリ切り替えボタン */}
       <Row className="mb-4 justify-content-center">
         {categories.map((category, idx) => (
           <Col xs="auto" key={idx}>
@@ -49,6 +54,7 @@ export default function Home() {
         ))}
       </Row>
 
+      {/* 商品一覧 */}
       <Row>
         {filteredProducts.length > 0 ? (
           filteredProducts.map((product) => (
@@ -87,8 +93,9 @@ export default function Home() {
             </Col>
           ))
         ) : (
+          // 該当商品がない場合のメッセージ
           <p className="text-muted text-center">
-            該当するカテゴリーに商品が存在しません
+            このカテゴリーには商品が登録されていません。
           </p>
         )}
       </Row>

@@ -27,11 +27,11 @@ export default function AddressModal({
       if (res.data.results) {
         setResult(res.data.results[0]);
       } else {
-        Swal.fire("未検出", "該当する住所が見つかりませんでした", "warning");
+        Swal.fire("該当なし", "一致する住所が見つかりませんでした", "warning");
         setResult(null);
       }
     } catch (e) {
-      Swal.fire("エラー", "検索に失敗しました", "error");
+      Swal.fire("エラー", "住所検索に失敗しました", "error");
     }
   };
 
@@ -42,22 +42,22 @@ export default function AddressModal({
       </Modal.Header>
       <Modal.Body>
         <Form.Group>
-          <Form.Label>郵便番号</Form.Label>
+          <Form.Label>郵便番号を入力</Form.Label>
           <Form.Control
             type="text"
             value={zipcode}
             onChange={(e) => setZipcode(e.target.value)}
-            placeholder="例: 0600062"
+            placeholder="例：0600062"
           />
         </Form.Group>
         <Button className="mt-2 w-100" onClick={search}>
-          🔍 検索
+          🔍 検索する
         </Button>
 
         {result && (
           <div className="mt-3 p-3 border rounded bg-light">
             <p className="mb-2">
-              <strong>検索結果:</strong>
+              <strong>検索結果：</strong>
               <br />
               {result.address1} {result.address2} {result.address3}
             </p>
@@ -69,7 +69,7 @@ export default function AddressModal({
                 onClose();
               }}
             >
-              この住所を使用
+              この住所を使用する
             </Button>
           </div>
         )}

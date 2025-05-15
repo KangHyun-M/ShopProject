@@ -11,11 +11,12 @@ export default function AdminItemList() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // 管理者であるかを確認（未ログインまたは非管理者ならリダイレクト）
     axiosInstance
       .get("/me")
       .then((res) => {
         if (res.data.role !== "ADMIN") {
-          Swal.fire("アクセス拒否", "管理者しかアクセスできません", "warning");
+          Swal.fire("アクセス拒否", "管理者のみアクセス可能です", "warning");
           navigate("/");
         }
       })
@@ -24,6 +25,7 @@ export default function AdminItemList() {
         navigate("/login");
       });
 
+    // 商品一覧を取得
     axiosInstance
       .get("/items")
       .then((res) => setItems(res.data))
@@ -33,13 +35,14 @@ export default function AdminItemList() {
       });
   }, [navigate]);
 
+  // 商品を削除（ソフトデリート）
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "確認",
-      text: "本当に削除しますか?",
+      text: "本当にこの商品を削除しますか？",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "はい",
+      confirmButtonText: "はい、削除します",
       cancelButtonText: "キャンセル",
     });
     if (!result.isConfirmed) return;
@@ -52,25 +55,27 @@ export default function AdminItemList() {
       );
     } catch (err) {
       console.error("削除失敗", err);
-      Swal.fire("エラー", "削除に失敗しました", "error");
+      Swal.fire("エラー", "商品の削除に失敗しました", "error");
     }
   };
 
+  // 商品を復元（削除フラグを解除）
   const handleRestore = async (id) => {
     try {
       await axiosInstance.put(`/admin/items/${id}/restore`);
-      Swal.fire("復旧完了", "商品が復旧されました", "success");
+      Swal.fire("復元完了", "商品が復元されました", "success");
       setItems((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, deleted: false } : item
         )
       );
     } catch (err) {
-      console.error("復旧失敗", err);
-      Swal.fire("エラー", "復旧に失敗しました", "error");
+      console.error("復元失敗", err);
+      Swal.fire("エラー", "商品の復元に失敗しました", "error");
     }
   };
 
+  // 選択されたカテゴリーに応じて商品をフィルタリング
   const filteredItems =
     selectedCategory === "Total"
       ? items
@@ -78,8 +83,9 @@ export default function AdminItemList() {
 
   return (
     <Container className="py-4">
-      <h2 className="mb-4 text-center">商品管理</h2>
+      <h2 className="mb-4 text-center">商品管理ページ</h2>
 
+      {/* カテゴリ別フィルター */}
       <Row className="mb-4 justify-content-center">
         <Col xs="auto">
           <Button
@@ -89,7 +95,7 @@ export default function AdminItemList() {
             }
             onClick={() => setSelectedCategory("Total")}
           >
-            Total
+            すべて
           </Button>
         </Col>
         {categories.map((category, idx) => (
@@ -107,6 +113,7 @@ export default function AdminItemList() {
         ))}
       </Row>
 
+      {/* 商品カード一覧 */}
       <Row>
         {filteredItems.length > 0 ? (
           filteredItems.map((item) => (
@@ -135,7 +142,7 @@ export default function AdminItemList() {
                       variant="success"
                       onClick={() => handleRestore(item.id)}
                     >
-                      復旧
+                      復元
                     </Button>
                   ) : (
                     <>
@@ -145,7 +152,7 @@ export default function AdminItemList() {
                         className="me-2"
                         onClick={() => navigate(`/admin/items/edit/${item.id}`)}
                       >
-                        修正
+                        編集
                       </Button>
                       <Button
                         size="sm"
@@ -162,7 +169,7 @@ export default function AdminItemList() {
           ))
         ) : (
           <p className="text-center text-muted">
-            該当するカテゴリーに商品が存在しません
+            このカテゴリーには商品が登録されていません。
           </p>
         )}
       </Row>

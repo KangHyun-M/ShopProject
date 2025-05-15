@@ -25,97 +25,91 @@ import lombok.RequiredArgsConstructor;
 public class CartService {
     
     private final CartRepository cartRepository;
-
     private final UserRepository userRepository;
-
     private final ItemRepository itemRepository;
 
-
-
-    //カートの商品リスト取得
+    // カート内の商品リストを取得する
     public List<CartItemDTO> getCartItems(String username) {
-    User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new RuntimeException("該当するユーザーは存在しません"));
-
-    List<CartItem> cartItems = cartRepository.fetchActiveCartItemsWithValidItem(user.getId());
-
-    List<CartItemDTO> dtoList = new ArrayList<>();
-
-    for (CartItem cartItem : cartItems) {
-        Item item = cartItem.getItem();
-
-        // mainImg 필터링 후 경로 가져오기　mainImgをフィルタリング後、パスを取得
-        Optional<ItemImg> mainImg = item.getItemImgs().stream()
-            .filter(ItemImg::getMainImg) // Boolean 타입 그대로 사용　Booleanタイプを使用
-            .findFirst();
-
-        String mainImagePath = mainImg.map(ItemImg::getImgPath).orElse(null);
-
-        CartItemDTO dto = CartItemDTO.builder()
-            .cartItemId(cartItem.getId())
-            .itemId(item.getId())
-            .itemName(item.getItemname())
-            .description(item.getDescription())
-            .price(item.getPrice())
-            .quantity(cartItem.getQuantity())
-            .imgUrl(mainImagePath)
-            .build();
-
-        dtoList.add(dto);
-    }
-
-    return dtoList;
-    }
-
-    //Add item to cart　カートに商品を追加
-    public void addCart(String username, Long itemId, int quantity){
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("該当するユーザーは存在しません"));
-        
+            .orElseThrow(() -> new RuntimeException("該当するユーザーは存在しません"));
+
+        // 有効な商品と削除されていないカートアイテムを取得
+        List<CartItem> cartItems = cartRepository.fetchActiveCartItemsWithValidItem(user.getId());
+
+        List<CartItemDTO> dtoList = new ArrayList<>();
+
+        for (CartItem cartItem : cartItems) {
+            Item item = cartItem.getItem();
+
+            // メイン画像のパスを取得
+            Optional<ItemImg> mainImg = item.getItemImgs().stream()
+                .filter(ItemImg::getMainImg)
+                .findFirst();
+
+            String mainImagePath = mainImg.map(ItemImg::getImgPath).orElse(null);
+
+            CartItemDTO dto = CartItemDTO.builder()
+                .cartItemId(cartItem.getId())
+                .itemId(item.getId())
+                .itemName(item.getItemname())
+                .description(item.getDescription())
+                .price(item.getPrice())
+                .quantity(cartItem.getQuantity())
+                .imgUrl(mainImagePath)
+                .build();
+
+            dtoList.add(dto);
+        }
+
+        return dtoList;
+    }
+
+    // 商品をカートに追加
+    public void addCart(String username, Long itemId, int quantity) {
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("該当するユーザーは存在しません"));
+
         Item item = itemRepository.findById(itemId)
-                        .orElseThrow(()-> new RuntimeException("該当する商品は存在しません"));
+            .orElseThrow(() -> new RuntimeException("該当する商品は存在しません"));
 
-        
         CartItem cartItem = CartItem.builder()
-                    .user(user)
-                    .item(item)
-                    .quantity(quantity)
-                    .createdAt(LocalDateTime.now())
-                    .modifiedAt(LocalDateTime.now())
-                    .build();
-
+            .user(user)
+            .item(item)
+            .quantity(quantity)
+            .createdAt(LocalDateTime.now())
+            .modifiedAt(LocalDateTime.now())
+            .build();
 
         cartRepository.save(cartItem);
     }
 
-    //Cart Item Amount Change   カート内の商品の数量変更
-    public void updateQuantity(String username, Long cartItemId, int quantity){
+    // カート内商品の数量を更新
+    public void updateQuantity(String username, Long cartItemId, int quantity) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("該当するユーザーは存在しません"));
-        
+            .orElseThrow(() -> new RuntimeException("該当するユーザーは存在しません"));
+
         CartItem cartItem = cartRepository.findById(cartItemId)
-                    .orElseThrow(()-> new RuntimeException("該当する商品は存在しません"));
-            
-        if(!cartItem.getUser().getId().equals(user.getId())){
+            .orElseThrow(() -> new RuntimeException("該当する商品は存在しません"));
+
+        if (!cartItem.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("アクセス権限がありません");
         }
 
         cartItem.setQuantity(quantity);
         cartItem.setModifiedAt(LocalDateTime.now());
-        
+
         cartRepository.save(cartItem);
     }
 
-
-    //商品をカートから削除、物理的な削除ではない
-    public void deleteCartItem(String username, Long cartItemId){
+    // カート商品を削除（論理削除）
+    public void deleteCartItem(String username, Long cartItemId) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("該当するユーザーは存在しません"));
+            .orElseThrow(() -> new RuntimeException("該当するユーザーは存在しません"));
 
         CartItem cartItem = cartRepository.findById(cartItemId)
-                    .orElseThrow(()-> new RuntimeException("該当する商品は存在しませんt"));
+            .orElseThrow(() -> new RuntimeException("該当する商品は存在しません"));
 
-        if(!cartItem.getUser().getId().equals(user.getId())){
+        if (!cartItem.getUser().getId().equals(user.getId())) {
             throw new AccessDeniedException("アクセス権限がありません");
         }
 
@@ -125,26 +119,29 @@ public class CartService {
         cartRepository.save(cartItem);
     }
 
-    public List<CartItemDTO> getSelectedCartItems(String username, List<Long> ids){
+    // 選択されたカート商品のリストを取得
+    public List<CartItemDTO> getSelectedCartItems(String username, List<Long> ids) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(()-> new RuntimeException("ユーザーが存在しません"));
+            .orElseThrow(() -> new RuntimeException("ユーザーが存在しません"));
 
         return cartRepository.findByIdInAndUserId(ids, user.getId()).stream()
-                        .filter(cartItem -> !cartItem.isDeleted())
-                        .map(cartItem -> {
-                            Item item = cartItem.getItem();
-                            Optional<ItemImg> mainImg = item.getItemImgs().stream()
-                                            .filter(ItemImg::getMainImg)
-                                            .findFirst();
-                            return CartItemDTO.builder()
-                                    .cartItemId(cartItem.getId())
-                                    .itemId(item.getId())
-                                    .itemName(item.getItemname())
-                                    .description(item.getDescription())
-                                    .price(item.getPrice())
-                                    .quantity(cartItem.getQuantity())
-                                    .imgUrl(mainImg.map(ItemImg::getImgPath).orElse(null))
-                                    .build();
-                        }).collect(Collectors.toList());  
+            .filter(cartItem -> !cartItem.isDeleted()) // 削除されていないアイテムのみ
+            .map(cartItem -> {
+                Item item = cartItem.getItem();
+                Optional<ItemImg> mainImg = item.getItemImgs().stream()
+                    .filter(ItemImg::getMainImg)
+                    .findFirst();
+
+                return CartItemDTO.builder()
+                    .cartItemId(cartItem.getId())
+                    .itemId(item.getId())
+                    .itemName(item.getItemname())
+                    .description(item.getDescription())
+                    .price(item.getPrice())
+                    .quantity(cartItem.getQuantity())
+                    .imgUrl(mainImg.map(ItemImg::getImgPath).orElse(null))
+                    .build();
+            })
+            .collect(Collectors.toList());
     }
-}  
+}

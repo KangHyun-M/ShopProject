@@ -9,6 +9,7 @@ export default function UserList() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // ユーザー一覧を取得（管理者用）
   useEffect(() => {
     axiosInstance
       .get("/admin/users")
@@ -20,20 +21,24 @@ export default function UserList() {
       .finally(() => setLoading(false));
   }, []);
 
+  // ローディング中表示
   if (loading) {
     return (
       <div className="text-center mt-5">
         <Spinner animation="border" variant="primary" />
-        <p className="mt-2">読み込み中…</p>
+        <p className="mt-2">読み込み中です...</p>
       </div>
     );
   }
 
   return (
     <Container className="py-4">
+      {/* ヘッダー */}
       <h3 className="fw-bold mb-4">👥 ユーザー一覧</h3>
+
+      {/* ユーザーが存在しない場合 */}
       {users.length === 0 ? (
-        <p className="text-muted">ユーザーが存在しません</p>
+        <p className="text-muted">登録されたユーザーが存在しません。</p>
       ) : (
         users.map((user) => (
           <Card
@@ -43,10 +48,10 @@ export default function UserList() {
             onClick={() => navigate(`/admin/users/${user.id}`)}
           >
             <p className="mb-1">
-              <strong>ID:</strong> {user.username}
+              <strong>メールアドレス：</strong> {user.username}
             </p>
             <p className="mb-0">
-              <strong>ニックネーム:</strong> {user.usernic}
+              <strong>ニックネーム：</strong> {user.usernic}
             </p>
           </Card>
         ))

@@ -9,5 +9,8 @@ import com.example.shopback.entity.Order;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    
+    // 사용자 이메일(username)로 주문 내역을 조회
+    // ユーザーのメールアドレス(username)で注文履歴を取得
     List<Order> findByUser_Username(String username);
 }

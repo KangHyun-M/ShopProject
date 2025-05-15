@@ -1,4 +1,3 @@
-// src/pages/ItemRestorePage.jsx
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import Swal from "sweetalert2";
@@ -7,6 +6,7 @@ import { Container, Row, Col, Card, Button } from "react-bootstrap";
 export default function ItemRestorePage() {
   const [items, setItems] = useState([]);
 
+  // 削除された商品一覧を取得
   useEffect(() => {
     axiosInstance
       .get("/admin/items/deleted")
@@ -17,24 +17,25 @@ export default function ItemRestorePage() {
       });
   }, []);
 
+  // 商品復旧処理
   const handleRestore = (id) => {
     Swal.fire({
-      title: "復旧確認",
-      text: "該当する商品を復旧しますか?",
+      title: "復元確認",
+      text: "この商品を復元してもよろしいですか？",
       icon: "question",
       showCancelButton: true,
-      confirmButtonText: "はい、復旧",
+      confirmButtonText: "はい、復元する",
       cancelButtonText: "キャンセル",
     }).then((result) => {
       if (result.isConfirmed) {
         axiosInstance
-          .put(`/admin/items/${id}/retore`)
+          .put(`/admin/items/${id}/restore`) // ← オリジナルは誤字「retore」
           .then(() => {
-            Swal.fire("成功", "復旧完了", "success");
+            Swal.fire("成功", "商品が復元されました", "success");
             setItems((prev) => prev.filter((item) => item.id !== id));
           })
           .catch(() => {
-            Swal.fire("エラー", "復旧に失敗しました", "error");
+            Swal.fire("エラー", "復元に失敗しました", "error");
           });
       }
     });
@@ -42,7 +43,9 @@ export default function ItemRestorePage() {
 
   return (
     <Container className="py-4">
-      <h2 className="mb-4 text-center">🗃️ 削除された商品を復旧</h2>
+      <h2 className="mb-4 text-center">🗃️ 削除された商品の復元</h2>
+
+      {/* 商品カード一覧 */}
       <Row>
         {items.length > 0 ? (
           items.map((item) => (
@@ -70,14 +73,17 @@ export default function ItemRestorePage() {
                     variant="success"
                     onClick={() => handleRestore(item.id)}
                   >
-                    ✅ 復旧
+                    ✅ 復元
                   </Button>
                 </Card.Footer>
               </Card>
             </Col>
           ))
         ) : (
-          <p className="text-center text-muted">削除された商品が存在しません</p>
+          // 商品が存在しない場合
+          <p className="text-center text-muted">
+            現在、復元可能な商品はありません。
+          </p>
         )}
       </Row>
     </Container>

@@ -1,11 +1,17 @@
 import axios from "axios";
 
+// 共通Axiosインスタンスの作成
 const axiosInstance = axios.create({
+  // 全てのリクエストの基本URL（バックエンドの /api ルートに向けて）
   baseURL: "/api",
+
+  // JSON形式でリクエスト送信
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true, // 쿠키를 자동으로 포함하여 세션 ID 전송　クッキーを自動的に含めてセッションIDを送信します
+
+  // 認証情報（クッキーなど）を自動で含める
+  withCredentials: true, // クッキーを自動的に含めてセッションIDを送信
 });
 
 export default axiosInstance;

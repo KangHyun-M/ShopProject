@@ -7,14 +7,16 @@ import {
   useCallback,
 } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2"; // SweetAlert2 사용
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // ログイン状態
+  const [user, setUser] = useState(null); // ユーザー情報
   const navigate = useNavigate();
 
+  // ユーザー情報取得
   const fetchUser = useCallback(async () => {
     try {
       const res = await axiosInstance.get("/me");
@@ -24,29 +26,41 @@ export const AuthProvider = ({ children }) => {
         setUser(null);
       }
     } catch (err) {
-      console.error("ユーザー情報の取得失敗", err);
+      console.error("ユーザー情報の取得に失敗しました", err);
       setUser(null);
     }
   }, []);
 
+  // ログイン処理
   const login = async (username, password, from = "/") => {
     try {
       const res = await axiosInstance.post("/login", { username, password });
       if (res.status === 200) {
         setIsLoggedIn(true);
-        localStorage.setItem("token", "true");
+        localStorage.setItem("token", "true"); // 仮のトークン保存（セッション維持の目的）
         await fetchUser();
-        alert("ログイン成功!");
+        await Swal.fire({
+          icon: "success",
+          title: "ログインに成功しました",
+          confirmButtonText: "OK",
+        });
         navigate(from, { replace: true });
       } else {
-        alert("ログイン失敗!");
+        await Swal.fire({
+          icon: "error",
+          title: "ログインに失敗しました",
+        });
       }
     } catch (err) {
-      console.error("ログイン要求失敗", err);
-      alert("ログイン失敗!");
+      console.error("ログインリクエスト失敗", err);
+      await Swal.fire({
+        icon: "error",
+        title: "ログインに失敗しました",
+      });
     }
   };
 
+  // ログアウト処理
   const logout = async () => {
     try {
       const res = await axiosInstance.post("/logout");
@@ -54,17 +68,27 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("token");
         setIsLoggedIn(false);
         setUser(null);
-        alert("ログアウトしました");
+        await Swal.fire({
+          icon: "info",
+          title: "ログアウトしました",
+        });
         navigate("/");
       } else {
-        alert("ログアウト失敗");
+        await Swal.fire({
+          icon: "error",
+          title: "ログアウトに失敗しました",
+        });
       }
     } catch (err) {
-      console.error("ログアウト要求失敗", err);
-      alert("ログアウト失敗");
+      console.error("ログアウトリクエスト失敗", err);
+      await Swal.fire({
+        icon: "error",
+        title: "ログアウトに失敗しました",
+      });
     }
   };
 
+  // 初回マウント時にセッション確認
   useEffect(() => {
     const checkSession = async () => {
       try {
@@ -91,7 +115,7 @@ export const AuthProvider = ({ children }) => {
     checkSession();
   }, []);
 
-  //중복 방지를 위한 user === null 조건 추가
+  // ログイン状態だが user が null の場合、再取得（多重フェッチ防止）
   useEffect(() => {
     if (isLoggedIn && user === null) {
       fetchUser();
@@ -105,4 +129,5 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
+// 認証状態を利用するためのフック
 export const useAuth = () => useContext(AuthContext);

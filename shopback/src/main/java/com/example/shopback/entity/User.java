@@ -26,29 +26,28 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Table(name = "UserTable")
 public class User {
-    
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long id;
+    private Long id; // ユーザーID（主キー）
 
-    @Column(name = "user_email",unique = true)
-    private String username;
+    @Column(name = "user_email", unique = true)
+    private String username; // ユーザー名（メールアドレス）
 
     @Column(name = "password")
-    private String password;
-    
+    private String password; // パスワード
+
     @Column(name = "usernic")
-    private String usernic;
+    private String usernic; // ニックネーム
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Role role; // ユーザーの権限（USER / ADMIN）
 
     @Column(name = "user_address")
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Address> address;
+    private List<Address> address; // ユーザーに紐づく住所リスト（1対多）
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Order> orders;
+    private List<Order> orders; // ユーザーに紐づく注文リスト（1対多）
 }

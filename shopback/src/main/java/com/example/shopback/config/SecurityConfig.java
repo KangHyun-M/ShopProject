@@ -20,69 +20,77 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    
 
     @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder(){
+    public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        
-
         http.authorizeHttpRequests((auth) -> auth
-                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN")              //어드민 권한에만 허용  ADMIN権限のみ許容
-                .requestMatchers("/api/user/**").hasAnyRole("USER","ADMIN")        //유저,어드민 권한에만 허용　USER、ADMIN権限のみ許容
-                .requestMatchers("/api/signup","/api/login","/api/check-username","/api/send-auth",
-                "/api/verify-code","/api/check-usernic","/api/me","/api/items/{id}","/api/items").permitAll()                  //全てのAPIを許容
-                .anyRequest().authenticated()                                                           //その他、認証必要
+                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN") // 管理者ロールのみ許可
+                .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN") // ユーザーおよび管理者ロールのみ許可
+                .requestMatchers(
+                        "/api/signup",
+                        "/api/login",
+                        "/api/check-username",
+                        "/api/send-auth",
+                        "/api/verify-code",
+                        "/api/check-usernic",
+                        "/api/me",
+                        "/api/items/{id}",
+                        "/api/items",
+                        "/api/find-id",
+                        "/api/reset-password",
+                        "/change-password"
+                ).permitAll() // 認証不要でアクセス可能
+                .anyRequest().authenticated() // 上記以外は認証が必要
         );
 
-
-        //세션의 중복로그인 허용여부　セッションの重複ログイン許可可否
+        // セッションの多重ログイン制限
         http.sessionManagement((auth) -> auth
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(true)
-                //true = 초과하는 경우 새로운 로그인 차단　超える場合、新しいログインを遮断
-                //false = 초과하는 경우 현재 세션을 삭제   超える場合、現在のセッションを削除
+                // true = セッション数を超えると新規ログインを拒否
+                // false = セッション数を超えると既存セッションを無効化
         );
 
-        //세션의 고정보호 레벨을 10으로 설정    セッションの固定保護レベルを１０に設定
+        // セッション固定攻撃対策レベル設定
         http.sessionManagement((auth) -> auth
-                .sessionFixation()
-                .changeSessionId()
-                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                .sessionFixation().changeSessionId()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 必要に応じてセッション生成
         );
 
-        //로그아웃관련 설정     ログアウト関連設定
+        // ログアウト処理の設定
         http.logout(auth -> auth
                 .logoutUrl("/api/logout")
-                .invalidateHttpSession(true)
+                .invalidateHttpSession(true) // セッションの破棄
                 .logoutSuccessHandler((request, response, authentication) -> {
-                    response.setStatus(HttpServletResponse.SC_OK);
+                    response.setStatus(HttpServletResponse.SC_OK); // 200 OK返却
                 })
         );
 
-        //csrf관련 설정, 개발중에는 disable, 개발후 주석처리    CSRF関連設定、開発中にはDISABLEに、開発完了後にはコメント処理
+        // CSRF設定：開発中は無効化、運用時に有効化推奨
         http.csrf((auth) -> auth.disable());
 
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource())); //커스텀 CORS 설정 사용 カスタマイズCORS設定使用
+        // CORS設定を適用（Reactとの連携）
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(){
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedOriginPatterns(List.of("http://localhost:3000")); //리액트 주소  リアクトのポート設定
-        corsConfig.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
-        corsConfig.setAllowedHeaders(List.of("*"));
-        corsConfig.setAllowCredentials(true); //쿠키, 인증을 헤더에 적용　クッキー、認証をヘダーに適用
+        corsConfig.setAllowedOriginPatterns(List.of("http://localhost:3000")); // Reactの開発サーバーURL
+        corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // 許可するHTTPメソッド
+        corsConfig.setAllowedHeaders(List.of("*")); // 全てのヘッダーを許可
+        corsConfig.setAllowCredentials(true); // 認証情報（Cookie等）の送信を許可
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig); //모든 경로에 대해 설정    全てのURLに対して設定
+        source.registerCorsConfiguration("/**", corsConfig); // 全パスにCORS設定を適用
 
         return source;
     }

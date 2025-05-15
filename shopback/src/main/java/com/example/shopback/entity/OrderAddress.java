@@ -24,14 +24,14 @@ public class OrderAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "orderAddr_id")
-    private Long id;
+    private Long id; // 配送先ID（主キー）
 
     @Column(name = "orderAddr_zip")
-    private String zipcode;
+    private String zipcode; // 郵便番号
 
     @Column(name = "orderAddr_addr")
-    private String address;
+    private String address; // 住所（都道府県、市区町村、番地など）
 
     @OneToOne(mappedBy = "orderAddress")
-    private Order order;
+    private Order order; // 対応する注文（注文エンティティと1対1）
 }

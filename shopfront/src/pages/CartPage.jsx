@@ -1,4 +1,3 @@
-// src/pages/CartPage.jsx
 import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +10,7 @@ export default function CartPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // ログイン確認 → カート取得
     axiosInstance
       .get("/me")
       .then(() => fetchCartItems())
@@ -20,6 +20,7 @@ export default function CartPage() {
       });
   }, [navigate]);
 
+  // カートアイテム取得（削除済み商品は除外）
   const fetchCartItems = () => {
     axiosInstance
       .get("/user/cart")
@@ -32,10 +33,12 @@ export default function CartPage() {
       });
   };
 
+  // 商品詳細ページへ移動
   const goToDetail = (itemId) => {
     navigate(`/items/${itemId}`);
   };
 
+  // カートから商品削除
   const deleteItem = (cartItemId) => {
     Swal.fire({
       title: "削除確認",
@@ -63,6 +66,7 @@ export default function CartPage() {
     });
   };
 
+  // 数量変更
   const updateQuantity = (cartItemId, newQty) => {
     axiosInstance
       .patch(`/user/cart/${cartItemId}?quantity=${newQty}`)
@@ -76,16 +80,18 @@ export default function CartPage() {
         );
       })
       .catch((err) => {
-        Swal.fire("エラー", "数量変更に失敗しました", "error");
+        Swal.fire("エラー", "数量の変更に失敗しました", "error");
         console.error(err);
       });
   };
 
+  // 合計金額計算
   const totalPrice = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
     0
   );
 
+  // 注文ページへ遷移
   const handleOrder = () => {
     if (cartItems.length === 0) {
       Swal.fire("注文不可", "注文する商品がありません", "info");
@@ -99,10 +105,14 @@ export default function CartPage() {
   return (
     <Container className="mt-4">
       <h3 className="mb-4">🛒 カート</h3>
+
       <Row>
+        {/* カートが空のとき */}
         {cartItems.length === 0 && (
-          <p className="text-muted">カートが空いてます</p>
+          <p className="text-muted">カートに商品がありません。</p>
         )}
+
+        {/* カート商品一覧 */}
         {cartItems.map((item) => (
           <Col md={4} key={item.cartItemId} className="mb-4">
             <Card className="h-100 shadow-sm border-0">
@@ -126,10 +136,10 @@ export default function CartPage() {
                 <Card.Title>{item.itemName}</Card.Title>
                 <Card.Text>{item.description}</Card.Text>
                 <Card.Text className="fw-bold text-primary">
-                  価格: {item.price.toLocaleString()}円
+                  価格：{item.price.toLocaleString()}円
                 </Card.Text>
                 <Card.Text>
-                  数量:
+                  数量：
                   <select
                     value={item.quantity}
                     onChange={(e) =>
@@ -159,9 +169,10 @@ export default function CartPage() {
         ))}
       </Row>
 
+      {/* 合計金額・注文ボタン */}
       <div className="text-end mt-4">
         <h5>
-          Total:
+          合計：
           <span className="text-success fw-bold">
             {totalPrice.toLocaleString()} 円
           </span>
@@ -171,6 +182,7 @@ export default function CartPage() {
         </Button>
       </div>
 
+      {/* 注文完了モーダル（※注文API処理とは未連携） */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>🎉 注文完了</Modal.Title>

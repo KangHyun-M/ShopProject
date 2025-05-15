@@ -1,4 +1,3 @@
-// src/pages/Signup.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../component/axiosInstance";
 import Swal from "sweetalert2";
@@ -13,6 +12,7 @@ import {
 } from "react-bootstrap";
 
 export default function Signup() {
+  // ユーザー入力状態
   const [user, setUser] = useState({
     username: "",
     password: "",
@@ -22,39 +22,46 @@ export default function Signup() {
     role: "USER",
   });
 
+  // バリデーション状態
   const [isUsernameValid, setIsUsernameValid] = useState(false);
   const [isPwValid, setIsPwValid] = useState(false);
   const [isConfirmPwValid, setIsConfirmPwValid] = useState(false);
   const [isUsernicValid, setIsUsernicValid] = useState(false);
   const [isAuthValid, setIsAuthValid] = useState(false);
 
+  // パスワード検証
   const validatePasswords = useCallback(() => {
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).{8,15}$/;
     setIsPwValid(passwordRegex.test(user.password));
     setIsConfirmPwValid(user.password === user.confirmPass);
   }, [user.password, user.confirmPass]);
 
+  // ニックネーム検証
   const validateUsernic = useCallback(() => {
     const usernicRegex = /^[a-zA-Z0-9]{1,15}$/;
     setIsUsernicValid(usernicRegex.test(user.usernic));
   }, [user.usernic]);
 
+  // メールアドレス検証
   const validateUsername = useCallback(() => {
     const usernameRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     setIsUsernameValid(usernameRegex.test(user.username));
   }, [user.username]);
 
+  // 入力変更時にリアルタイム検証
   useEffect(() => {
     validatePasswords();
     validateUsernic();
     validateUsername();
   }, [validatePasswords, validateUsernic, validateUsername]);
 
+  // 入力変更ハンドラ
   const handleChange = (e) => {
     const { id, value } = e.target;
     setUser((prev) => ({ ...prev, [id]: value }));
   };
 
+  // メールアドレス重複確認
   const checkUsername = async () => {
     try {
       const res = await axiosInstance.post("/check-username", {
@@ -63,14 +70,15 @@ export default function Signup() {
       Swal.fire({
         icon: res.data ? "error" : "success",
         title: res.data
-          ? "存在するメールアドレスです"
-          : "使えるメールアドレスです",
+          ? "すでに登録済みのメールアドレスです"
+          : "使用可能なメールアドレスです",
       });
     } catch {
       Swal.fire({ icon: "error", title: "メールアドレス確認エラー" });
     }
   };
 
+  // 認証番号送信
   const sendAuth = async () => {
     if (!isUsernameValid) {
       Swal.fire({
@@ -85,10 +93,11 @@ export default function Signup() {
       });
       Swal.fire({ icon: "success", title: "認証番号を送信しました" });
     } catch {
-      Swal.fire({ icon: "error", title: "認証番号送信失敗" });
+      Swal.fire({ icon: "error", title: "認証番号の送信に失敗しました" });
     }
   };
 
+  // 認証番号確認
   const verifyAuth = async () => {
     try {
       const res = await axiosInstance.post("/verify-code", {
@@ -101,10 +110,11 @@ export default function Signup() {
       });
       if (res.data) setIsAuthValid(true);
     } catch {
-      Swal.fire({ icon: "error", title: "認証中にエラー発生しました" });
+      Swal.fire({ icon: "error", title: "認証中にエラーが発生しました" });
     }
   };
 
+  // ニックネーム重複確認
   const checkUserNic = async () => {
     try {
       const res = await axiosInstance.post("/check-usernic", {
@@ -112,7 +122,9 @@ export default function Signup() {
       });
       Swal.fire({
         icon: res.data ? "error" : "success",
-        title: res.data ? "存在するニックネームです" : "使えるニックネームです",
+        title: res.data
+          ? "すでに使用中のニックネームです"
+          : "使用可能なニックネームです",
       });
       setIsUsernicValid(!res.data);
     } catch {
@@ -120,6 +132,7 @@ export default function Signup() {
     }
   };
 
+  // 登録処理
   const handleSumbit = async (e) => {
     e.preventDefault();
     if (!isAuthValid) {
@@ -128,14 +141,18 @@ export default function Signup() {
     }
     try {
       await axiosInstance.post("/signup", user);
-      Swal.fire({ icon: "success", title: "会員登録完了" }).then(() => {
-        window.location.href = "/";
-      });
+      Swal.fire({ icon: "success", title: "会員登録が完了しました" }).then(
+        () => {
+          window.location.href = "/";
+        }
+      );
     } catch (error) {
       console.error("登録エラー", error);
+      Swal.fire({ icon: "error", title: "登録に失敗しました" });
     }
   };
 
+  // フォーム入力がすべて有効かチェック
   const validateForm = () =>
     isUsernameValid &&
     isPwValid &&
@@ -150,6 +167,7 @@ export default function Signup() {
           <Card className="p-4 shadow">
             <h3 className="text-center mb-4">📝 会員登録</h3>
             <Form onSubmit={handleSumbit}>
+              {/* メールアドレス入力 */}
               <Form.Group className="mb-3">
                 <Form.Label>メールアドレス</Form.Label>
                 <InputGroup>
@@ -167,6 +185,7 @@ export default function Signup() {
                 </InputGroup>
               </Form.Group>
 
+              {/* 認証番号入力 */}
               <Form.Group className="mb-3">
                 <Form.Label>認証番号</Form.Label>
                 <InputGroup>
@@ -190,6 +209,7 @@ export default function Signup() {
                 </InputGroup>
               </Form.Group>
 
+              {/* パスワード */}
               <Form.Group className="mb-3">
                 <Form.Label>パスワード</Form.Label>
                 <Form.Control
@@ -197,15 +217,16 @@ export default function Signup() {
                   id="password"
                   value={user.password}
                   onChange={handleChange}
-                  placeholder="8~15字, 特殊文字含む"
+                  placeholder="8〜15字、英数字と記号を含む"
                   isInvalid={user.password && !isPwValid}
                   required
                 />
                 <Form.Control.Feedback type="invalid">
-                  パスワードは英数字+特殊文字を含めて8~15字で入力してください
+                  英字・数字・特殊文字を含む8〜15字で入力してください
                 </Form.Control.Feedback>
               </Form.Group>
 
+              {/* パスワード確認 */}
               <Form.Group className="mb-3">
                 <Form.Label>パスワード確認</Form.Label>
                 <Form.Control
@@ -213,7 +234,7 @@ export default function Signup() {
                   id="confirmPass"
                   value={user.confirmPass}
                   onChange={handleChange}
-                  placeholder="確認のため再入力"
+                  placeholder="もう一度入力"
                   isInvalid={user.confirmPass && !isConfirmPwValid}
                   required
                 />
@@ -222,6 +243,7 @@ export default function Signup() {
                 </Form.Control.Feedback>
               </Form.Group>
 
+              {/* ニックネーム */}
               <Form.Group className="mb-3">
                 <Form.Label>ニックネーム</Form.Label>
                 <InputGroup>
@@ -242,6 +264,7 @@ export default function Signup() {
                 </Form.Control.Feedback>
               </Form.Group>
 
+              {/* 登録ボタン */}
               <div className="d-grid mt-4">
                 <Button type="submit" disabled={!validateForm()}>
                   登録する

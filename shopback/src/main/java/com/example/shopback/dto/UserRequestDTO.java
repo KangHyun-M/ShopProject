@@ -13,8 +13,9 @@ import lombok.Setter;
 @NoArgsConstructor
 @Builder
 public class UserRequestDTO {
-    private Long id;
-    private String username;
-    private String usernic;
-    private List<OrderDTO> orders;
+
+    private Long id;                    // ユーザーID（PK）
+    private String username;           // メールアドレス（ログインID）
+    private String usernic;            // ニックネーム
+    private List<OrderDTO> orders;     // 注文履歴リスト
 }

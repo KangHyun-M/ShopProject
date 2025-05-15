@@ -26,77 +26,72 @@ public class ItemController {
     
     @Autowired
     private ItemService itemService;
-    
-    //상품 등록 商品登録
+
+    // 📦 商品登録（画像を含む multipart/form-data）
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping(value = "/admin/registration",consumes = "multipart/form-data")
+    @PostMapping(value = "/admin/registration", consumes = "multipart/form-data")
     public ResponseEntity<Void> createItem(
-        @RequestPart("item")ItemDTO itemDTO,
-        @RequestPart("images")List<MultipartFile> images){
-        
-        itemService.createItem(itemDTO,images);
+        @RequestPart("item") ItemDTO itemDTO,
+        @RequestPart("images") List<MultipartFile> images
+    ) {
+        itemService.createItem(itemDTO, images);
         return ResponseEntity.ok().build();
     }
 
-    
-
-    //모두조회  全商品の照会
+    // 📃 商品一覧取得（カテゴリー指定があれば絞り込み）
     @GetMapping("/items")
-    public ResponseEntity<List<ItemDTO>> getItems(@RequestParam(required = false)String category){
+    public ResponseEntity<List<ItemDTO>> getItems(@RequestParam(required = false) String category) {
         List<ItemDTO> items;
 
-        if(category != null && !category.equals("Total")){
-            items = itemService.getItemsByCategory(category);
+        if (category != null && !category.equals("Total")) {
+            items = itemService.getItemsByCategory(category); // カテゴリー別
         } else {
-            items = itemService.getAllItems();
+            items = itemService.getAllItems(); // 全商品
         }
 
         return ResponseEntity.ok(items);
     }
-    
 
-    //상세조회  商品の詳細照会
+    // 🔍 商品詳細取得（ID指定）
     @GetMapping("/items/{id}")
-    public ResponseEntity<ItemDTO> getItemByID(@PathVariable Long id){
+    public ResponseEntity<ItemDTO> getItemByID(@PathVariable Long id) {
         return itemService.getItemById(id)
-                    .map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    //상품수정 商品修正
+    // 🛠 商品修正（multipart/form-data で画像も受け付け）
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = "/admin/items/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateItem(
         @PathVariable Long id,
         @RequestPart("item") ItemUpdateDTO updateDTO,
         @RequestPart(value = "images", required = false) List<MultipartFile> images
-    ){
+    ) {
         itemService.updateItem(id, updateDTO, images);
         return ResponseEntity.ok().build();
     }
-    
 
-    //상품삭제  商品削除
-    @PutMapping("/admin/items/{id}/delete")
+    // 🗑 商品削除（論理削除：deleted = true）
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long id){
+    @PutMapping("/admin/items/{id}/delete")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
         itemService.deleteItem(id);
-        
         return ResponseEntity.ok().build();
     }
 
-    //상품복구  商品復旧
-    @PutMapping("/admin/items/{id}/retore")
+    // ♻️ 削除された商品を復旧
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> restoreItem(@PathVariable Long id){
+    @PutMapping("/admin/items/{id}/restore")
+    public ResponseEntity<Void> restoreItem(@PathVariable Long id) {
         itemService.restoreItem(id);
         return ResponseEntity.ok().build();
     }
 
-    //삭제된 상품들 보기    削除された商品照会
+    // 🗃️ 削除された商品一覧取得（管理者専用）
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/items/deleted")
-    public ResponseEntity<List<ItemDTO>> getDeletedItems(){
+    public ResponseEntity<List<ItemDTO>> getDeletedItems() {
         return ResponseEntity.ok(itemService.getDeletedItems());
     }
 }

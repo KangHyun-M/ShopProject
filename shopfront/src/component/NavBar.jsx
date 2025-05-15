@@ -6,6 +6,7 @@ import { Navbar, Nav, Container, NavDropdown } from "react-bootstrap";
 export default function AppNavbar() {
   const { user, logout } = useAuth();
 
+  // ログアウト実行処理
   const handleLogout = () => {
     logout();
   };
@@ -13,11 +14,16 @@ export default function AppNavbar() {
   return (
     <Navbar bg="light" expand="lg" className="shadow-sm mb-4 border-bottom">
       <Container>
+        {/* ロゴ・タイトル部分 */}
         <Navbar.Brand as={Link} to="/" className="fw-bold fs-4 text-primary">
           タイトル未定
         </Navbar.Brand>
+
+        {/* モバイル向けトグル */}
         <Navbar.Toggle aria-controls="nav-links" />
+
         <Navbar.Collapse id="nav-links">
+          {/* 左側メニュー */}
           <Nav className="me-auto gap-3">
             <Nav.Link as={Link} to="/">
               ホーム
@@ -28,6 +34,8 @@ export default function AppNavbar() {
             <Nav.Link as={Link} to="/mypage/info">
               👤 マイページ
             </Nav.Link>
+
+            {/* 管理者だけ表示されるメニュー */}
             {user?.role === "ADMIN" && (
               <Nav.Link as={Link} to="/admin" className="text-danger fw-bold">
                 🔧 アドミンページ
@@ -35,10 +43,11 @@ export default function AppNavbar() {
             )}
           </Nav>
 
+          {/* 右側メニュー（ログイン状態に応じて切替） */}
           <Nav className="gap-2">
             {user ? (
               <NavDropdown
-                title={`👋 ${user.username} (${user.role})`}
+                title={`👋 ${user.username}（${user.role}）`}
                 id="user-dropdown"
                 align="end"
               >
