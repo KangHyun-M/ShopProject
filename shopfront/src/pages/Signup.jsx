@@ -234,7 +234,7 @@ export default function Signup() {
                   id="confirmPass"
                   value={user.confirmPass}
                   onChange={handleChange}
-                  placeholder="もう一度入力"
+                  placeholder="もう一度入力してください"
                   isInvalid={user.confirmPass && !isConfirmPwValid}
                   required
                 />

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axiosInstance from "../component/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Spinner } from "react-bootstrap";
+import Swal from "sweetalert2";
 
 export default function AddressList() {
   const [addressList, setAddressList] = useState([]);
@@ -14,14 +15,18 @@ export default function AddressList() {
       .then((res) => {
         const role = res.data.role;
         if (role !== "USER" && role !== "ADMIN") {
-          alert("管理者またはユーザーのみアクセス可能です");
+          Swal.fire(
+            "アクセス拒否",
+            "管理者またはユーザーのみアクセス可能です",
+            "warning"
+          );
           navigate("/");
         } else {
           fetchAddressList();
         }
       })
       .catch(() => {
-        alert("ログインが必要です");
+        Swal.fire("未ログイン", "ログインが必要です", "info");
         navigate("/login");
       });
   }, [navigate]);
@@ -32,32 +37,41 @@ export default function AddressList() {
       .then((res) => setAddressList(res.data))
       .catch((err) => {
         console.error("住所取得失敗", err);
-        alert("住所情報を取得できませんでした");
+        Swal.fire("エラー", "住所情報を取得できませんでした", "error");
       })
       .finally(() => setLoading(false));
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("この住所を本当に削除しますか？")) return;
+    const result = await Swal.fire({
+      title: "確認",
+      text: "この住所を本当に削除しますか？",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "はい、削除します",
+      cancelButtonText: "キャンセル",
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await axiosInstance.delete(`/user/address/${id}`);
-      alert("住所が削除されました");
+      Swal.fire("削除完了", "住所が削除されました", "success");
       setAddressList((prev) => prev.filter((a) => a.id !== id));
     } catch (err) {
       console.error("住所削除失敗", err);
-      alert("削除に失敗しました");
+      Swal.fire("エラー", "削除に失敗しました", "error");
     }
   };
 
   const handleSetMain = async (id) => {
     try {
       await axiosInstance.patch(`/user/address/${id}/main`);
-      alert("メイン住所に設定されました");
+      Swal.fire("成功", "メイン住所に設定されました", "success");
       fetchAddressList();
     } catch (err) {
       console.error("メイン住所設定失敗", err);
-      alert("メイン住所の設定に失敗しました");
+      Swal.fire("エラー", "メイン住所の設定に失敗しました", "error");
     }
   };
 

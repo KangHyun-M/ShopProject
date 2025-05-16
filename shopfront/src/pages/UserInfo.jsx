@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, Col, Container, Row, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../component/axiosInstance";
+import Swal from "sweetalert2";
 
 export default function UserInfo() {
   const navigate = useNavigate();
@@ -14,8 +15,16 @@ export default function UserInfo() {
       .then((res) => setUser(res.data))
       .catch((err) => {
         console.error("ユーザー情報の読み込みに失敗", err);
-        alert("管理者またはユーザーのみアクセス可能です");
-        navigate("/login");
+
+        // 🚨 エラーメッセージ表示（SweetAlert2）
+        Swal.fire({
+          title: "アクセス拒否",
+          text: "管理者またはユーザーのみアクセス可能です",
+          icon: "warning",
+          confirmButtonText: "ログインへ",
+        }).then(() => {
+          navigate("/login");
+        });
       });
   }, [navigate]);
 

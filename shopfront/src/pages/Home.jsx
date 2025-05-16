@@ -10,7 +10,7 @@ const categories = [
   "GPU",
   "RAM",
   "Motherboard",
-  "Storage",
+  "SSD",
   "Power Supply",
 ];
 
