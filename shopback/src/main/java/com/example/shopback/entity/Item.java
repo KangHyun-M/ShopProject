@@ -18,7 +18,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-// ✅ 商品情報を表すエンティティ
+//  商品情報を表すエンティティ
 @Entity
 @Getter@Setter
 @NoArgsConstructor
@@ -27,42 +27,42 @@ import lombok.Setter;
 @Table(name = "Item")
 public class Item {
     
-    // ✅ 商品ID（主キー、オートインクリメント）
+    //  商品ID（主キー、オートインクリメント）
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "item_id")
     private Long id;
 
-    // ✅ 商品名
+    //  商品名
     @Column(name = "item_name")
     private String itemname;
 
-    // ✅ 商品の説明文
+    //  商品の説明文
     @Column(name = "item_description")
     private String description;
 
-    // ✅ 商品価格（単位: 円）
+    //  商品価格（単位: 円）
     @Column(name = "item_price")
     private int price;
 
-    // ✅ カテゴリー（例: CPU, GPU など）
+    //  カテゴリー（例: CPU, GPU など）
     @Column(name = "category")
     private String category;
 
-    // ✅ 登録日時（デフォルト：現在時刻）
+    //  登録日時（デフォルト：現在時刻）
     @Column(name = "created_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime createdAt;
 
-    // ✅ 更新日時（デフォルト：現在時刻）
+    //  更新日時（デフォルト：現在時刻）
     @Column(name = "modified_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime modifiedAt;
 
-    // ✅ 削除フラグ（true の場合は論理削除済）
+    //  削除フラグ（true の場合は論理削除済）
     @Builder.Default
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 
-    // ✅ 商品に紐づく画像リスト（1対多）
+    //  商品に紐づく画像リスト（1対多）
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<ItemImg> itemImgs = new ArrayList<>();

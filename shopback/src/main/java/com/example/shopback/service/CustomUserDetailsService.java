@@ -20,7 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // ユーザーアカウント情報をDBから取得（Optional使用）
+        // ユーザーアカウント情報をDBから取得（Optional使用） 
         Optional<User> optionalUser = userRepository.findByUsername(username);
 
         // 該当ユーザーが存在する場合、CustomUserDetailsにラップして返却

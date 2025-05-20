@@ -161,7 +161,7 @@ public class UserService {
                 .build();
     }
 
-    // 🔐 仮パスワードを発行して保存し、メールで送信
+    //  仮パスワードを発行して保存し、メールで送信
     public boolean TempPassword(String email) {
         Optional<User> optionalUser = userRepository.findByUsername(email);
 
@@ -220,7 +220,7 @@ public class UserService {
                 .build();
     }
 
-    // 🔐 パスワード変更処理
+    //  パスワード変更処理
     public boolean changePassword(String username, String currentPassword, String newPassword) {
         Optional<User> optionalUser = userRepository.findByUsername(username);
 

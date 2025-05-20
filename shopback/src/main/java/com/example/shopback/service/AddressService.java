@@ -96,7 +96,7 @@ public class AddressService {
         User user = userRepository.findWithAddressByUsername(username)
                 .orElseThrow(() -> new RuntimeException("ユーザーを見つけられません"));
 
-        // 全ての住所の代表フラグを false に設定
+        // 全ての住所の代表フラグを false に設定 
         user.getAddress().forEach(addr -> addr.setIsMain(false));
 
         // 指定した住所を代表住所に設定

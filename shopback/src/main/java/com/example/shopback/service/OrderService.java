@@ -33,7 +33,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
 
-    // 注文処理
+    // 注文処理 
     @Transactional
     public void placeOrder(String username, OrderRequestDTO request) {
         // ユーザー取得（住所付き）

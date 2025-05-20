@@ -27,7 +27,7 @@ public class ItemController {
     @Autowired
     private ItemService itemService;
 
-    // 📦 商品登録（画像を含む multipart/form-data）
+    //  商品登録（画像を含む multipart/form-data）
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/admin/registration", consumes = "multipart/form-data")
     public ResponseEntity<Void> createItem(
@@ -38,7 +38,7 @@ public class ItemController {
         return ResponseEntity.ok().build();
     }
 
-    // 📃 商品一覧取得（カテゴリー指定があれば絞り込み）
+    //  商品一覧取得（カテゴリー指定があれば絞り込み）
     @GetMapping("/items")
     public ResponseEntity<List<ItemDTO>> getItems(@RequestParam(required = false) String category) {
         List<ItemDTO> items;
@@ -52,7 +52,7 @@ public class ItemController {
         return ResponseEntity.ok(items);
     }
 
-    // 🔍 商品詳細取得（ID指定）
+    //  商品詳細取得（ID指定）
     @GetMapping("/items/{id}")
     public ResponseEntity<ItemDTO> getItemByID(@PathVariable Long id) {
         return itemService.getItemById(id)
@@ -60,7 +60,7 @@ public class ItemController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 🛠 商品修正（multipart/form-data で画像も受け付け）
+    //  商品修正（multipart/form-data で画像も受け付け）
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping(value = "/admin/items/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateItem(
@@ -72,7 +72,7 @@ public class ItemController {
         return ResponseEntity.ok().build();
     }
 
-    // 🗑 商品削除（論理削除：deleted = true）
+    //  商品削除（論理削除：deleted = true）
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/items/{id}/delete")
     public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
@@ -80,7 +80,7 @@ public class ItemController {
         return ResponseEntity.ok().build();
     }
 
-    // ♻️ 削除された商品を復旧
+    //  削除された商品を復旧
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/admin/items/{id}/restore")
     public ResponseEntity<Void> restoreItem(@PathVariable Long id) {
@@ -88,7 +88,7 @@ public class ItemController {
         return ResponseEntity.ok().build();
     }
 
-    // 🗃️ 削除された商品一覧取得（管理者専用）
+    //  削除された商品一覧取得（管理者専用）
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/items/deleted")
     public ResponseEntity<List<ItemDTO>> getDeletedItems() {

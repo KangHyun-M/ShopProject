@@ -168,7 +168,7 @@ public class ItemService {
         itemRepository.save(item);
     }
 
-    // 削除済み商品のみ照会
+    // 削除済み商品のみ照会 
     public List<ItemDTO> getDeletedItems() {
         return itemRepository.findByDeletedTrue()
                 .stream()

@@ -25,7 +25,7 @@ public class ItemImgService {
     private final ItemImgRepository itemImgRepository;
 
     /**
-     * 商品画像をアップロードしてDBに保存
+     * 商品画像をアップロードしてDBに保存 
      * @param item 対象商品
      * @param images 画像ファイル一覧
      * @param mainImg サムネイル画像のインデックス

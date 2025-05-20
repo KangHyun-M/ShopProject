@@ -29,7 +29,7 @@ public class CartController {
     @Autowired
     private CartService cartService;
 
-    // 🛒 ログインユーザーのカート一覧を取得
+    //  ログインユーザーのカート一覧を取得
     @GetMapping("/user/cart")
     public ResponseEntity<List<CartItemDTO>> getUserCart(Authentication authentication){
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -41,7 +41,7 @@ public class CartController {
         return ResponseEntity.ok(cartItems);
     }
 
-    // 🛒 カートに商品追加
+    //  カートに商品追加
     @PostMapping("/user/cart")
     public ResponseEntity<?> addCart(@RequestBody CartRequestDTO cartRequestDTO, Authentication authentication){
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -53,7 +53,7 @@ public class CartController {
         return ResponseEntity.ok("カートに追加完了");
     }
 
-    // 🗑 カートから商品削除（ソフトデリート）
+    //  カートから商品削除（ソフトデリート）
     @DeleteMapping("/user/cart/{cartItemId}")
     public ResponseEntity<?> deleteCartItem(@PathVariable Long cartItemId, Authentication auth){
         String username = auth.getName();
@@ -61,7 +61,7 @@ public class CartController {
         return ResponseEntity.ok("削除完了");
     }
 
-    // 🔄 カート内商品の数量を変更
+    //  カート内商品の数量を変更
     @PatchMapping("/user/cart/{cartItemId}")
     public ResponseEntity<?> updateQuantity(
         @PathVariable Long cartItemId,
@@ -72,7 +72,7 @@ public class CartController {
         return ResponseEntity.ok("数量変更完了");
     }
 
-    // 🧾 カート内選択商品（注文対象）を取得
+    //  カート内選択商品（注文対象）を取得
     @GetMapping("/user/cart/sum")
     public ResponseEntity<List<CartItemDTO>> getCartSum(@RequestParam String ids, Principal principal){
         String username = principal.getName();

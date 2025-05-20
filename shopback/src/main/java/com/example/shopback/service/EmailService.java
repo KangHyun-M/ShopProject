@@ -18,7 +18,7 @@ public class EmailService {
     
     private final JavaMailSender javaMailSender;
 
-    /**
+    /** 
      * 認証コードを生成して送信する
      * @param code メールアドレス
      * @return 発行した認証コード

@@ -83,7 +83,7 @@ public class CartService {
         cartRepository.save(cartItem);
     }
 
-    // カート内商品の数量を更新
+    // カート内商品の数量を更新 
     public void updateQuantity(String username, Long cartItemId, int quantity) {
         User user = userRepository.findByUsername(username)
             .orElseThrow(() -> new RuntimeException("該当するユーザーは存在しません"));

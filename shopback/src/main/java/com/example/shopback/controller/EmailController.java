@@ -20,7 +20,7 @@ public class EmailController {
 
     private final EmailService emailService;
 
-    // 📩 認証番号を送信し、セッションに保存
+    //  認証番号を送信し、セッションに保存
     @PostMapping("/send-auth")
     public ResponseEntity<Void> sendAuth(@RequestParam("username") String username, HttpSession session) {
         // 認証コードを生成してメール送信
@@ -32,7 +32,7 @@ public class EmailController {
         return ResponseEntity.ok().build();
     }
 
-    // ✅ 入力された認証コードをセッションのコードと比較
+    //  入力された認証コードをセッションのコードと比較
     @PostMapping("/verify-code")
     public ResponseEntity<Boolean> verifyCode(@RequestBody VerifyCodeRequest request, HttpSession session) {
         String sessionCode = (String) session.getAttribute("verificationCode");
